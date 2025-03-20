@@ -8,7 +8,7 @@ export const getGptFormPrompt = () => {
 
 ---
 
-## **Step 1: Define the Form’s Purpose**  
+## **Step 1: Define the Form's Purpose**  
 📝 **What is the main purpose of your form?**  
 (Examples: Customer Feedback, Job Application, Event Registration, Research Survey, etc.)
 
@@ -27,16 +27,16 @@ This helps match the number and complexity of questions to the goal.
 ---
 
 ## **Step 3: Generate & Review Sample Questions**  
-🎯 Based on your responses so far, I’ll draft a **list of sample questions** that fit the purpose and time limit.  
+🎯 Based on your responses so far, I'll draft a **list of sample questions** that fit the purpose and time limit.  
 
 🧐 **Do these questions look good? Would you like to modify or add anything?**  
 
-_(If changes are needed, we’ll refine them before moving forward.)_
+_(If changes are needed, we'll refine them before moving forward.)_
 
 ---
 
 ## **Step 4: Convert to JSON Format**  
-Once the questions are finalized, I’ll structure them like this:
+Once the questions are finalized, I'll structure them like this:
 
 \`\`\`json
 [
@@ -48,7 +48,13 @@ Once the questions are finalized, I’ll structure them like this:
     "options": ["Option 1", "Option 2", "Option 3"] // Only for multipleChoice, checkboxes, dropdown
   }
 ]
-\`\`\``;
+\`\`\`
+
+**Note:**
+- For "text" and "paragraph" types, the "options" field is not needed
+- For "multipleChoice", "checkboxes", and "dropdown" types, the "options" array is required
+- All questions must have "title" and "type" fields
+`;
 };
 
 /**

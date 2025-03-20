@@ -23,12 +23,9 @@ export default async function handler(req, res) {
     }
 
     if (!jsonData) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Form data is missing. Please provide JSON data for your form.",
-        });
+      return res.status(400).json({
+        error: "Form data is missing. Please provide JSON data for your form.",
+      });
     }
 
     // Parse the JSON data
@@ -100,18 +97,42 @@ export default async function handler(req, res) {
       auth: oauth2Client,
     });
 
-    // Convert JSON data to Google Forms format
-    const formData = convertJsonToGoogleForm(formName, parsedJsonData);
-
     try {
-      // Create the form
-      const response = await forms.forms.create({
-        requestBody: formData,
+      // STEP 1: Create an empty form with just the title
+      console.log("Creating form with title:", formName);
+      const createResponse = await forms.forms.create({
+        requestBody: {
+          info: {
+            title: formName,
+            documentTitle: formName,
+          },
+        },
       });
 
+      const formId = createResponse.data.formId;
+      console.log("Form created with ID:", formId);
+
+      // STEP 2: Add questions to the form using batchUpdate
+      const formItems = convertJsonToGoogleForm(parsedJsonData);
+      console.log("Prepared form items:", JSON.stringify(formItems, null, 2));
+
+      console.log("Adding questions to form...");
+      const updateResponse = await forms.forms.batchUpdate({
+        formId: formId,
+        requestBody: {
+          requests: formItems.map((item, index) => ({
+            createItem: {
+              item: item,
+              location: { index: index },
+            },
+          })),
+        },
+      });
+      console.log("Questions added successfully");
+
       // Return the form URL
-      const formId = response.data.formId;
       const formUrl = `https://docs.google.com/forms/d/${formId}/viewform`;
+      console.log("Form URL:", formUrl);
 
       return res.status(200).json({
         formUrl,
@@ -119,6 +140,7 @@ export default async function handler(req, res) {
       });
     } catch (apiError) {
       console.error("Google Forms API error:", apiError);
+      console.error("Error details:", JSON.stringify(apiError, null, 2));
 
       // Handle specific Google API errors
       if (apiError.code === 401 || apiError.code === 403) {
@@ -151,30 +173,34 @@ export default async function handler(req, res) {
 }
 
 // Helper function to convert JSON to Google Forms format
-function convertJsonToGoogleForm(formName, jsonData) {
-  // Basic form structure
-  const formData = {
-    info: {
-      title: formName,
-      documentTitle: formName,
-    },
-    items: [],
-  };
-
+function convertJsonToGoogleForm(jsonData) {
   // Process each question from the JSON
-  jsonData.forEach((question, index) => {
+  return jsonData.map((question, index) => {
     const formItem = {
       title: question.title || `Question ${index + 1}`,
-      description: question.description || "",
     };
+
+    if (question.description) {
+      formItem.description = question.description;
+    }
 
     // Set the question type
     switch (question.type) {
       case "text":
-        formItem.textQuestion = { paragraph: false };
+        formItem.questionItem = {
+          question: {
+            required: question.required || false,
+            textQuestion: { paragraph: false },
+          },
+        };
         break;
       case "paragraph":
-        formItem.textQuestion = { paragraph: true };
+        formItem.questionItem = {
+          question: {
+            required: question.required || false,
+            textQuestion: { paragraph: true },
+          },
+        };
         break;
       case "multipleChoice":
         formItem.questionItem = {
@@ -216,11 +242,15 @@ function convertJsonToGoogleForm(formName, jsonData) {
         };
         break;
       default:
-        formItem.textQuestion = { paragraph: false };
+        // Default to short text
+        formItem.questionItem = {
+          question: {
+            required: question.required || false,
+            textQuestion: { paragraph: false },
+          },
+        };
     }
 
-    formData.items.push(formItem);
+    return formItem;
   });
-
-  return formData;
 }

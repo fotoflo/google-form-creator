@@ -14,8 +14,12 @@ export default NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       authorization: {
         params: {
-          scope:
-            "https://www.googleapis.com/auth/forms https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
+          scope: [
+            "https://www.googleapis.com/auth/userinfo.email",
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "https://www.googleapis.com/auth/forms.body",
+            "https://www.googleapis.com/auth/drive.file",
+          ].join(" "),
           prompt: "consent",
           access_type: "offline",
           response_type: "code",
