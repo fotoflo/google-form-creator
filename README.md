@@ -1,28 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Google Forms Creator
+
+A web application that allows users to create Google Forms from JSON data. Built with Next.js and the Google Forms API.
+
+## Features
+
+- Sign in with Google OAuth
+- Create Google Forms from JSON data
+- AI-assisted form creation with ChatGPT prompts
+- Validation of form data
+- Detailed error messages
+
+## Technologies Used
+
+- Next.js
+- NextAuth.js for authentication
+- Google Forms API
+- Tailwind CSS for styling
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 14.x or later
+- A Google Cloud Platform account with the Google Forms API enabled
+- OAuth 2.0 credentials for Google authentication
+
+### Installation
+
+1. Clone the repository:
+
+   ```
+   git clone https://github.com/fotoflo/google-form-creator.git
+   cd google-form-creator
+   ```
+
+2. Install dependencies:
+
+   ```
+   npm install
+   ```
+
+3. Create a `.env.local` file with the following variables:
+
+   ```
+   # Google OAuth
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+   # NextAuth
+   NEXTAUTH_URL=http://localhost:3000
+   NEXTAUTH_SECRET=your_nextauth_secret
+   ```
+
+4. Run the development server:
+
+   ```
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Usage
+
+1. Sign in with your Google account
+2. Enter a name for your form
+3. Paste your JSON data or use the "Load Sample JSON" button
+4. Click "Create Google Form"
+5. Access your newly created form via the provided link
+
+## JSON Format
+
+The application expects JSON data in the following format:
+
+```json
+[
+  {
+    "title": "Question text here",
+    "type": "text", // Options: text, paragraph, multipleChoice, checkboxes, dropdown
+    "description": "Optional description text",
+    "required": true, // or false
+    "options": ["Option 1", "Option 2", "Option 3"] // Only for multipleChoice, checkboxes, dropdown
+  }
+]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## AI-Assisted Form Creation
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+Use the provided ChatGPT prompt to generate form JSON. The prompt will guide you through:
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+1. Defining your form's purpose
+2. Determining the appropriate length
+3. Generating relevant questions
+4. Converting to the required JSON format
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+## License
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+MIT
 
 ## Learn More
 
