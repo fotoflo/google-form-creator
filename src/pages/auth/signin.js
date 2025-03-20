@@ -23,18 +23,11 @@ export default function SignIn({ providers }) {
           {providers &&
             Object.values(providers).map((provider) => (
               <div key={provider.name} className="text-center">
-                <button
-                  onClick={() => signIn(provider.id, { callbackUrl: "/" })}
-                  className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mb-3"
-                >
-                  Sign in with {provider.name} (onClick)
-                </button>
-
                 <Link
                   href={`/api/auth/signin/${provider.id}?callbackUrl=/`}
-                  className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                  className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  Sign in with {provider.name} (direct link)
+                  Sign in with {provider.name}
                 </Link>
               </div>
             ))}
