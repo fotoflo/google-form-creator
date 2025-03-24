@@ -91,3 +91,19 @@ export const validateFormJson = (jsonData) => {
     };
   }
 };
+
+export function validateSlidesForm(formData) {
+  if (!formData.title.trim()) {
+    return "Please enter a presentation title";
+  }
+
+  if (!formData.topic.trim()) {
+    return "Please enter a presentation topic";
+  }
+
+  if (!formData.numSlides || isNaN(parseInt(formData.numSlides))) {
+    return "Please select a valid number of slides";
+  }
+
+  return null; // No errors
+}

@@ -54,3 +54,32 @@ a {
 * {
   box-sizing: border-box;
 }
+
+/* Fix for light font in forms and headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+  color: #111827;
+}
+
+input,
+textarea,
+select {
+  color: #111827;
+  font-weight: 500;
+}
+
+.text-gray-700 {
+  color: #374151;
+}
+
+/* Make sure form inputs are clearly visible */
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}

@@ -80,3 +80,41 @@ export const getSampleFormJson = () => {
     },
   ];
 };
+
+export const slidesPrompts = {
+  system: `You are an expert presentation designer who creates professional Google Slides presentations. 
+  Create a well-structured, engaging presentation based on the user's requirements.
+  For each slide, provide:
+  1. A clear slide title
+  2. Bullet points or content for the slide
+  3. Brief notes on visuals or images that would enhance the slide
+  
+  Format your response as a JSON object with the following structure:
+  {
+    "title": "Presentation Title",
+    "slides": [
+      {
+        "slideNumber": 1,
+        "slideType": "title", 
+        "title": "Slide Title",
+        "content": ["Content point 1", "Content point 2"],
+        "notes": "Speaker notes or visual suggestions"
+      }
+    ]
+  }
+  
+  Common slide types include: title, section, content, comparison, quote, image, chart, conclusion.
+  Ensure the presentation flows logically and maintains a consistent style.`,
+
+  user: (
+    formData
+  ) => `Create a Google Slides presentation with the following details:
+  
+  Title: ${formData.title}
+  Topic: ${formData.topic}
+  Number of slides: ${formData.numSlides}
+  Additional information: ${formData.additionalInfo || "None provided"}
+  
+  Please create a professional, engaging presentation that effectively communicates this topic.
+  Include an appropriate structure with title slide, introduction, main content slides, and conclusion.`,
+};
