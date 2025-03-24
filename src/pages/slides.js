@@ -120,7 +120,7 @@ Ensure the presentation flows logically and maintains a consistent style.`;
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
                   placeholder="Enter a title for your presentation"
                 />
               </div>
@@ -158,7 +158,7 @@ Ensure the presentation flows logically and maintains a consistent style.`;
                       <li>Use &quot;&gt; Note&quot; for speaker notes</li>
                     </ul>
                     <div className="mt-2 p-2 bg-gray-100 rounded">
-                      <pre className="text-xs">
+                      <pre className="text-xs text-gray-800">
                         # Introduction{"\n"}- Welcome to our presentation{"\n"}-
                         Today we'll discuss key points{"\n"}
                         &gt; Introduce team members here{"\n"}
@@ -180,7 +180,7 @@ Ensure the presentation flows logically and maintains a consistent style.`;
                   value={formData.markdownContent}
                   onChange={handleChange}
                   rows="12"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 font-mono"
                   placeholder="# Slide 1 Title
 - Bullet point 1
 - Bullet point 2
@@ -232,7 +232,7 @@ Ensure the presentation flows logically and maintains a consistent style.`;
                     <textarea
                       readOnly
                       value={promptToCopy}
-                      className="w-full h-32 p-3 bg-gray-50 border border-gray-300 rounded-md font-mono text-sm"
+                      className="w-full h-32 p-3 bg-gray-50 border border-gray-300 rounded-md font-mono text-sm text-gray-800"
                     />
                     <button
                       type="button"
