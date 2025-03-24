@@ -14,6 +14,7 @@ export default function Slides() {
     markdownContent: "",
   });
   const [showInstructions, setShowInstructions] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,14 +50,30 @@ export default function Slides() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create slides");
+        const errorData = await response.json();
+        setError(
+          errorData.error || errorData.details || "Failed to create slides"
+        );
+        throw new Error(errorData.error || "Failed to create slides");
       }
 
       const data = await response.json();
-      router.push(`/result?id=${data.id}`);
+
+      // Check if we have a direct presentation URL
+      if (data.presentationUrl) {
+        // Redirect directly to the Google Slides presentation
+        window.open(data.presentationUrl, "_blank");
+        // Also redirect to our result page
+        router.push(`/result?id=${data.id}`);
+      } else {
+        // Fall back to just the result page
+        router.push(`/result?id=${data.id}`);
+      }
     } catch (err) {
       console.error("Error creating slides:", err);
-      setError("Failed to create slides. Please try again.");
+      if (!error) {
+        setError("Failed to create slides. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -238,7 +255,8 @@ Ensure the presentation flows logically and maintains a consistent style.`;
                       type="button"
                       onClick={() => {
                         navigator.clipboard.writeText(promptToCopy);
-                        alert("Prompt copied to clipboard!");
+                        setShowToast(true);
+                        setTimeout(() => setShowToast(false), 2000);
                       }}
                       className="absolute top-2 right-2 px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300"
                     >
@@ -261,6 +279,12 @@ Ensure the presentation flows logically and maintains a consistent style.`;
               <li>Separate slides with &quot;---&quot; on its own line</li>
             </ul>
           </div>
+
+          {showToast && (
+            <div className="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-md shadow-lg transition-opacity duration-300">
+              Prompt copied to clipboard!
+            </div>
+          )}
         </>
       )}
     </Layout>
