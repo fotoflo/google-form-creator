@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { getGptFormPrompt, getSampleFormJson } from "../utils/formPrompts";
@@ -195,7 +195,7 @@ export default function Home() {
         <meta name="description" content="Create Google Forms from JSON data" />
       </Head>
 
-      <h1 className="text-3xl font-bold mb-6 text-center">
+      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
         Google Forms Creator
       </h1>
 
@@ -205,35 +205,49 @@ export default function Home() {
 
       {status === "unauthenticated" && (
         <div className="text-center py-8 bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-2xl font-bold mb-4">
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">
             Welcome to Google Forms Creator
           </h2>
-          <p className="mb-6">
+          <p className="mb-6 text-gray-600">
             Create custom Google Forms quickly using JSON or pre-built templates
           </p>
 
           <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-              <h3 className="font-bold text-lg mb-2">🚀 Quick Creation</h3>
-              <p>Convert JSON to Google Forms with a single click</p>
+              <h3 className="font-bold text-lg mb-2 text-blue-700">
+                🚀 Quick Creation
+              </h3>
+              <p className="text-blue-600">
+                Convert JSON to Google Forms with a single click
+              </p>
             </div>
             <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-              <h3 className="font-bold text-lg mb-2">📋 Templates</h3>
-              <p>Use pre-built templates for common form types</p>
+              <h3 className="font-bold text-lg mb-2 text-green-700">
+                📋 Templates
+              </h3>
+              <p className="text-green-600">
+                Use pre-built templates for common form types
+              </p>
             </div>
             <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
-              <h3 className="font-bold text-lg mb-2">🤖 AI Assistance</h3>
-              <p>Generate forms with AI using our ChatGPT prompts</p>
+              <h3 className="font-bold text-lg mb-2 text-purple-700">
+                🤖 AI Assistance
+              </h3>
+              <p className="text-purple-600">
+                Generate forms with AI using our ChatGPT prompts
+              </p>
             </div>
           </div>
 
-          <p className="mb-4">Please sign in with Google to create forms</p>
-          <Link
-            href="/auth/signin"
+          <p className="mb-4 text-gray-700">
+            Please sign in with Google to create forms
+          </p>
+          <button
+            onClick={() => signIn("google")}
             className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md transition-colors"
           >
             Sign in with Google
-          </Link>
+          </button>
         </div>
       )}
 
@@ -338,7 +352,7 @@ export default function Home() {
                   Paste the following prompt to ChatGPT or your AI of choice to
                   generate a form structure:
                 </h3>
-                <p className="mb-3 text-sm">
+                <p className="mb-3 text-sm text-blue-700">
                   This prompt will help you create the perfect form JSON
                   structure.
                 </p>
@@ -372,18 +386,20 @@ export default function Home() {
                 {formTemplates.map((template, index) => (
                   <div
                     key={index}
-                    className="border border-gray-200 rounded-lg p-4 hover:shadow-md cursor-pointer transition-shadow"
+                    className="border border-gray-200 rounded-lg p-4 hover:shadow-md cursor-pointer transition-shadow hover:border-blue-300"
                     onClick={() => {
                       setFormName(template.name);
                       setJsonData(JSON.stringify(template.json, null, 2));
                       setActiveTab("create");
                     }}
                   >
-                    <h3 className="font-bold text-lg mb-1">{template.name}</h3>
+                    <h3 className="font-bold text-lg mb-1 text-gray-800">
+                      {template.name}
+                    </h3>
                     <p className="text-gray-600 text-sm mb-3">
                       {template.description}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-blue-500">
                       {template.json.length} questions
                     </p>
                   </div>
@@ -394,16 +410,18 @@ export default function Home() {
 
           {/* How It Works Tab */}
           {activeTab === "guide" && (
-            <div className="prose max-w-none">
-              <h2>How to Create Forms with JSON</h2>
+            <div>
+              <h2 className="text-xl font-bold mb-4 text-gray-800">
+                How to Create Forms with JSON
+              </h2>
 
-              <p>
+              <p className="text-gray-600 mb-4">
                 Google Forms Creator allows you to quickly create forms by
                 providing a JSON structure. Follow these steps to create your
                 form:
               </p>
 
-              <ol className="list-decimal pl-6 space-y-3 mb-6">
+              <ol className="list-decimal pl-6 space-y-3 mb-6 text-gray-700">
                 <li>
                   <strong>Define your form structure</strong> - Create a JSON
                   array where each object represents a question
@@ -426,11 +444,15 @@ export default function Home() {
                 </li>
               </ol>
 
-              <h3>JSON Structure</h3>
+              <h3 className="text-lg font-bold mb-2 text-gray-800">
+                JSON Structure
+              </h3>
 
-              <p>Each question in your form should follow this structure:</p>
+              <p className="text-gray-600 mb-2">
+                Each question in your form should follow this structure:
+              </p>
 
-              <pre className="bg-gray-100 p-3 rounded text-sm overflow-auto">
+              <pre className="bg-gray-100 p-3 rounded text-sm overflow-auto mb-6">
                 {`{
   "title": "Question text here",
   "type": "text", // Options: text, paragraph, multipleChoice, checkboxes, dropdown
@@ -440,14 +462,16 @@ export default function Home() {
 }`}
               </pre>
 
-              <h3>Using AI to Generate Forms</h3>
+              <h3 className="text-lg font-bold mb-2 text-gray-800">
+                Using AI to Generate Forms
+              </h3>
 
-              <p>
+              <p className="text-gray-600 mb-2">
                 You can use the provided ChatGPT prompt to generate form JSON.
                 The prompt will guide you through:
               </p>
 
-              <ul className="list-disc pl-6 space-y-2">
+              <ul className="list-disc pl-6 space-y-2 text-gray-700">
                 <li>Defining your form's purpose</li>
                 <li>Determining the appropriate length</li>
                 <li>Generating relevant questions</li>
