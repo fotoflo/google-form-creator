@@ -117,7 +117,7 @@ export default async function handler(req, res) {
       console.log("Prepared form items:", JSON.stringify(formItems, null, 2));
 
       console.log("Adding questions to form...");
-      const updateResponse = await forms.forms.batchUpdate({
+      await forms.forms.batchUpdate({
         formId: formId,
         requestBody: {
           requests: formItems.map((item, index) => ({

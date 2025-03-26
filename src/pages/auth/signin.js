@@ -1,6 +1,5 @@
 import { getProviders, signIn } from "next-auth/react";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
 
 export default function SignIn({ providers }) {
@@ -52,9 +51,10 @@ export default function SignIn({ providers }) {
   );
 }
 
-export async function getServerSideProps(context) {
-  const providers = await getProviders();
+export async function getServerSideProps() {
   return {
-    props: { providers: providers ?? {} },
+    props: {
+      providers: await getProviders(),
+    },
   };
 }

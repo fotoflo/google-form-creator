@@ -65,19 +65,78 @@ ${main.imagePrompt}
  * @returns {string} The formatted prompt
  */
 export function generateSlidesPrompt(formData) {
-  return `Create a professional Google Slides presentation based on the following markdown content.
-Format your response as markdown with the following structure:
+  return `You're about to create a professional Google Slides presentation from markdown content.
 
-${getExampleMarkdown()}
+**Before you begin, ask the user the following questions one at a time:**
 
-My presentation title: ${formData.title}
+1. Who is the target audience for this presentation?  
+2. What tone or visual style should the slides use? (e.g., minimalist, corporate, playful)  
+3. Do you want to define a specific image style? (e.g., flat illustrations, realistic photos, muted tones)?  
+4. How many slides should the presentation have (approximate or exact)?  
 
-Content:
+**Do not begin generating slides until you've received all four answers.**
+
+---
+
+**When you're ready, output the full presentation in this exact format:**
+
+Wrap the entire output in a markdown code block using \`\`\`md at the start and \`\`\` at the end.
+
+Each slide should follow this structure:
+
+\`\`\`md
+# Slide Title  
+- Bullet point 1  
+- Bullet point 2  
+>>> SPEAKER NOTES >>>
+Speaker notes (optional)
+<<< SPEAKER NOTES <<<
+
+<IMAGE PROMPT>
+Describe the image you'd like to generate
+</IMAGE PROMPT>
+
+===SLIDE===  
+\`\`\`
+
+Use this format for every slide. Do not include any extra commentary or explanation outside the code block.
+
+---
+
+**Image prompt requirements:**  
+- Always use **16:9 aspect ratio**  
+- Match the tone and visual style specified by the user  
+- Include an image prompt only when it enhances the slide  
+- Wrap image prompts in **<IMAGE PROMPT>** tags (as shown above)
+- The image prompt should *ALWAYS* specify "No text. Leave ample negative space on the image for it to serve as a presentation background."
+
+---
+
+**Reference structure:**  
+${"```md\n" + getExampleMarkdown() + "\n```"}
+
+---
+
+**My presentation title:**  
+${formData.title}
+
+**Content:**  
 ${formData.markdownContent}
 
-Each slide should be separated by "===SLIDE===" on its own line.
-Include appropriate slide titles, content, and speaker notes.
-You can also add image prompts using "!>" or ">>> IMAGE PROMPT >>>" format.
-These will be used to generate images for the slides.
-Ensure the presentation flows logically and maintains a consistent style.`;
+---
+
+**Instructions:**  
+- Ensure the presentation flows logically  
+- Use clear, relevant slide titles  
+- Add speaker notes when needed  
+- Respect the user's preferences for tone, audience, and visual style  
+- Stick to the requested slide count  
+- Format the final response exactly as described above, in a single \`md\` block
+
+
+Once the full presentation has been generated and displayed in a single markdown block, ask the user:
+
+"Now would you like me to generate the images one by one?"
+
+Wait for their response before generating any image content.`;
 }
