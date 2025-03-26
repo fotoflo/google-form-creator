@@ -3,9 +3,13 @@ import { useRouter } from "next/router";
 import React from "react";
 import { useSession } from "next-auth/react";
 import Layout from "../components/Layout";
+import {
+  generateSlidesPrompt,
+  getExampleMarkdown,
+} from "../utils/slidePrompts";
 
 export default function Slides() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -15,6 +19,12 @@ export default function Slides() {
   });
   const [showInstructions, setShowInstructions] = useState(false);
   const [showToast, setShowToast] = useState(false);
+
+  // Get the example markdown for the instructions
+  const exampleMarkdown = getExampleMarkdown();
+
+  // Generate the prompt using the utility function
+  const promptToCopy = generateSlidesPrompt(formData);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -83,36 +93,6 @@ export default function Slides() {
     }
   };
 
-  const promptToCopy = `Create a professional Google Slides presentation based on the following markdown content.
-Format your response as markdown with the following structure:
-
-# Slide 1: Title
-
-- Bullet point 1
-- Bullet point 2
-
-> Speaker notes: Additional context or notes for the presenter
-
-===SLIDE===
-
-# Slide 2: Content Slide
-
-1. Numbered point 1
-2. Numbered point 2
-
-> Speaker notes: More context
-
-===SLIDE===
-
-My presentation title: ${formData.title}
-
-Content:
-${formData.markdownContent}
-
-Each slide should be separated by "===SLIDE===" on its own line.
-Include appropriate slide titles, content, and speaker notes.
-Ensure the presentation flows logically and maintains a consistent style.`;
-
   return (
     <Layout
       title="Create Google Slides | AI Document Creator"
@@ -178,20 +158,27 @@ Ensure the presentation flows logically and maintains a consistent style.`;
                         Use &quot;===SLIDE===&quot; on a new line to separate
                         slides
                       </li>
-                      <li>Use &quot;&gt; Note&quot; for speaker notes</li>
+                      <li>
+                        For speaker notes, use either:
+                        <ul className="list-disc pl-5 mt-1">
+                          <li>
+                            <code>&gt; Your speaker note</code> (simple format)
+                          </li>
+                          <li>
+                            Or for multi-line notes:
+                            <pre className="mt-1 text-xs bg-gray-100 p-1 rounded">
+                              &gt;&gt;&gt; SPEAKER NOTES &gt;&gt;&gt;{"\n"}
+                              Your multi-line notes here....{"\n"}
+                              More notes on another line{"\n"}
+                              &lt;&lt;&lt; SPEAKER NOTES &lt;&lt;&lt;
+                            </pre>
+                          </li>
+                        </ul>
+                      </li>
                     </ul>
                     <div className="mt-2 p-2 bg-gray-100 rounded">
                       <pre className="text-xs text-gray-800">
-                        # Introduction{"\n"}- Welcome to our presentation{"\n"}-
-                        Today we'll discuss key points{"\n"}
-                        &gt; Introduce team members here{"\n"}
-                        {"\n"}===SLIDE==={"\n"}
-                        {"\n"}# Main Topic{"\n"}
-                        1. First important point{"\n"}
-                        2. Second important point{"\n"}
-                        {"\n"}===SLIDE==={"\n"}
-                        {"\n"}# Conclusion{"\n"}- Summary of key takeaways{"\n"}
-                        - Next steps
+                        {exampleMarkdown}
                       </pre>
                     </div>
                   </div>
@@ -286,6 +273,12 @@ Ensure the presentation flows logically and maintains a consistent style.`;
                 Separate slides with &quot;===SLIDE===&quot; on its own line
               </li>
             </ul>
+          </div>
+
+          <div className="text-sm text-amber-600 mt-1">
+            <strong>Note:</strong> Due to API limitations, speaker notes will
+            appear as small text boxes at the bottom of slides rather than in
+            the speaker notes section.
           </div>
 
           {showToast && (

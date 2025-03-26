@@ -80,6 +80,6 @@ select {
 /* Make sure form inputs are clearly visible */
 input::placeholder,
 textarea::placeholder {
-  color: #9ca3af;
+  color: #000000;
   opacity: 1;
 }

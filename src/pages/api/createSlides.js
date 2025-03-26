@@ -101,7 +101,7 @@ export default async function handler(req, res) {
 
       // Execute the batch update to create all slides
       console.log(`Creating ${requests.length} slides`);
-      const createSlidesResponse = await slides.presentations.batchUpdate({
+      await slides.presentations.batchUpdate({
         presentationId: presentationId,
         requestBody: {
           requests: requests,
@@ -128,6 +128,7 @@ export default async function handler(req, res) {
 
       console.log(`Found ${createdSlides.length} created slides to update`);
 
+      // First, update all slide content
       createdSlides.forEach((slideObj, index) => {
         console.log(
           `Updating slide ${index + 1} with objectId ${slideObj.objectId}`
@@ -175,16 +176,27 @@ export default async function handler(req, res) {
 
         // Update body
         if (bodyPlaceholder) {
+          // Clean up the content to remove any speaker notes markers
+          let cleanContent = slideContent.content;
+
+          // Remove any lines that might contain speaker notes markers
+          cleanContent = cleanContent.replace(/SPEAKER\s*NOTES/gi, "").trim();
+          cleanContent = cleanContent.replace(/>>>/g, "").trim();
+          cleanContent = cleanContent.replace(/<<</g, "").trim();
+
+          // Clean up any empty lines that might have been left
+          cleanContent = cleanContent.replace(/\n\s*\n/g, "\n").trim();
+
           contentRequests.push({
             insertText: {
               objectId: bodyPlaceholder.objectId,
-              text: slideContent.content,
+              text: cleanContent,
               insertionIndex: 0,
             },
           });
 
           // Format bullet points if needed
-          if (slideContent.content.includes("- ")) {
+          if (cleanContent.includes("- ") || cleanContent.includes("• ")) {
             contentRequests.push({
               createParagraphBullets: {
                 objectId: bodyPlaceholder.objectId,
@@ -195,19 +207,6 @@ export default async function handler(req, res) {
               },
             });
           }
-        }
-
-        // Add speaker notes
-        if (slideContent.speakerNotes && slideContent.speakerNotes.trim()) {
-          console.log(`Adding speaker notes to slide ${index + 1}`);
-          contentRequests.push({
-            insertText: {
-              objectId: slideObj.objectId,
-              text: slideContent.speakerNotes,
-              insertionIndex: 0,
-              speakerNotesObjectId: slideObj.objectId,
-            },
-          });
         }
       });
 
@@ -221,15 +220,137 @@ export default async function handler(req, res) {
       console.log(
         `Executing ${contentRequests.length} content update requests`
       );
+
       // Execute the content update batch
-      const contentUpdateResponse = await slides.presentations.batchUpdate({
+      await slides.presentations.batchUpdate({
         presentationId: presentationId,
         requestBody: {
           requests: contentRequests,
         },
       });
 
-      console.log("Slides added successfully");
+      console.log("Slide content updated successfully");
+
+      // STEP 4: Now handle speaker notes in a separate step
+      // Get the updated presentation again to access the notes pages
+      const finalPresentation = await slides.presentations.get({
+        presentationId: presentationId,
+        fields: "slides.objectId,slides.slideProperties.notesPage",
+      });
+
+      // Prepare requests for speaker notes
+      let speakerNotesRequests = [];
+
+      // Process each slide to add speaker notes - use Promise.all to handle async operations
+      await Promise.all(
+        finalPresentation.data.slides.map(async (slide, index) => {
+          // Skip slides without content or notes
+          if (index >= slideContents.length) return;
+
+          const slideContent = slideContents[index];
+
+          // Skip if no speaker notes
+          if (
+            !slideContent ||
+            !slideContent.speakerNotes ||
+            !slideContent.speakerNotes.trim()
+          ) {
+            return;
+          }
+
+          console.log(`Processing speaker notes for slide ${index + 1}`);
+
+          // Check if the slide has a notes page
+          if (slide.slideProperties && slide.slideProperties.notesPage) {
+            const notesPage = slide.slideProperties.notesPage;
+
+            try {
+              // Get the detailed notes page to find the speaker notes shape
+              const notesPageResponse = await slides.presentations.pages.get({
+                presentationId: presentationId,
+                pageObjectId: notesPage.objectId,
+              });
+
+              if (
+                notesPageResponse.data &&
+                notesPageResponse.data.pageElements
+              ) {
+                // Find the speaker notes shape (usually a SHAPE_TYPE_TEXT_BOX)
+                const speakerNotesShape =
+                  notesPageResponse.data.pageElements.find(
+                    (el) =>
+                      el.shape &&
+                      (el.shape.shapeType === "TEXT_BOX" ||
+                        el.shape.placeholder?.type === "BODY")
+                  );
+
+                if (speakerNotesShape) {
+                  console.log(
+                    `Found speaker notes shape with ID ${speakerNotesShape.objectId}`
+                  );
+
+                  // Add text to the speaker notes shape
+                  speakerNotesRequests.push({
+                    insertText: {
+                      objectId: speakerNotesShape.objectId,
+                      text: slideContent.speakerNotes,
+                      insertionIndex: 0,
+                    },
+                  });
+                } else {
+                  console.log(
+                    `No speaker notes shape found for slide ${index + 1}`
+                  );
+                  fallbackToTextBox(
+                    slide.objectId,
+                    slideContent.speakerNotes,
+                    speakerNotesRequests
+                  );
+                }
+              } else {
+                console.log(
+                  `No page elements found for notes page of slide ${index + 1}`
+                );
+                fallbackToTextBox(
+                  slide.objectId,
+                  slideContent.speakerNotes,
+                  speakerNotesRequests
+                );
+              }
+            } catch (notesError) {
+              console.error(`Error getting notes page: ${notesError.message}`);
+              fallbackToTextBox(
+                slide.objectId,
+                slideContent.speakerNotes,
+                speakerNotesRequests
+              );
+            }
+          } else {
+            console.log(`No notes page found for slide ${index + 1}`);
+            fallbackToTextBox(
+              slide.objectId,
+              slideContent.speakerNotes,
+              speakerNotesRequests
+            );
+          }
+        })
+      );
+
+      // Execute the speaker notes update batch if we have any requests
+      if (speakerNotesRequests.length > 0) {
+        console.log(
+          `Executing ${speakerNotesRequests.length} speaker notes update requests`
+        );
+
+        await slides.presentations.batchUpdate({
+          presentationId: presentationId,
+          requestBody: {
+            requests: speakerNotesRequests,
+          },
+        });
+
+        console.log("Speaker notes added successfully");
+      }
 
       // Generate a unique ID for this result
       const resultId = uuidv4();
@@ -286,7 +407,7 @@ export default async function handler(req, res) {
 
 // Helper function to parse markdown content into slides
 function parseMarkdownToSlides(markdownContent) {
-  // Use a more unique separator pattern: "===SLIDE==="
+  // Use the unique separator pattern for slides
   const slideTexts = markdownContent.split(/\n\s*===SLIDE===\s*\n/);
   console.log(`Found ${slideTexts.length} slides in markdown content`);
 
@@ -297,25 +418,63 @@ function parseMarkdownToSlides(markdownContent) {
     let content = "";
     let speakerNotes = "";
 
-    // Extract title (first # heading)
-    const titleMatch = slideText.match(/^#\s+(.+)$/m);
+    // Extract title - look for lines starting with "Slide X:" or "# "
+    const titleMatch = slideText.match(/^(?:Slide \d+:|#)\s+(.+)$/m);
     if (titleMatch) {
-      title = titleMatch[1];
+      title = titleMatch[1].trim();
       // Remove the title line from content
-      content = slideText.replace(/^#\s+(.+)$/m, "").trim();
+      content = slideText.replace(/^(?:Slide \d+:|#)\s+(.+)$/m, "").trim();
     } else {
       content = slideText.trim();
     }
 
-    // Extract speaker notes (lines starting with >)
-    const notesRegex = />\s+(.+)$/gm;
-    const notesMatches = [...content.matchAll(notesRegex)];
+    // Extract speaker notes using the stronger delimiter
+    // Look for content between >>> SPEAKER NOTES >>> and <<< SPEAKER NOTES <<<
+    const strongNotesRegex =
+      />>>\s*SPEAKER\s*NOTES\s*>>>([\s\S]*?)<<<\s*SPEAKER\s*NOTES\s*<<</i;
+    const strongNotesMatch = content.match(strongNotesRegex);
 
-    if (notesMatches.length > 0) {
-      speakerNotes = notesMatches.map((match) => match[1]).join("\n");
-      // Remove speaker notes from content
-      content = content.replace(/>\s+(.+)$/gm, "").trim();
+    if (strongNotesMatch) {
+      speakerNotes = strongNotesMatch[1].trim();
+      // Remove the speaker notes section from content
+      content = content.replace(strongNotesRegex, "").trim();
+      console.log(
+        `Found speaker notes with strong delimiter: "${speakerNotes.substring(
+          0,
+          50
+        )}${speakerNotes.length > 50 ? "..." : ""}"`
+      );
+    } else {
+      // Fall back to the traditional format (lines starting with >)
+      const traditionalNotesRegex = />\s+(.+)$/gm;
+      const traditionalNotesMatches = [
+        ...content.matchAll(traditionalNotesRegex),
+      ];
+
+      if (traditionalNotesMatches.length > 0) {
+        speakerNotes = traditionalNotesMatches
+          .map((match) => match[1])
+          .join("\n");
+        // Remove speaker notes from content
+        content = content.replace(/>\s+(.+)$/gm, "").trim();
+        console.log(
+          `Found speaker notes with traditional format: "${speakerNotes.substring(
+            0,
+            50
+          )}${speakerNotes.length > 50 ? "..." : ""}"`
+        );
+      }
     }
+
+    // Additional cleanup for any remaining speaker notes markers
+    content = content.replace(/SPEAKER\s*NOTES\s*>>.*$/gm, "").trim();
+    content = content.replace(/<<<\s*SPEAKER\s*NOTES\s*<<<.*$/gm, "").trim();
+
+    // Clean up any lines that just contain "SPEAKER NOTES" text
+    content = content.replace(/^.*SPEAKER\s*NOTES.*$/gm, "").trim();
+
+    // Remove any empty lines at the beginning or end
+    content = content.replace(/^\s+|\s+$/g, "");
 
     console.log(
       `Slide ${index + 1} processed: title="${title}", content length=${
@@ -329,6 +488,61 @@ function parseMarkdownToSlides(markdownContent) {
       speakerNotes,
     };
   });
+}
+
+// Helper function to create a text box for speaker notes as a fallback
+function fallbackToTextBox(slideObjectId, speakerNotes, requestsArray) {
+  const notesObjectId = `notes_text_${slideObjectId}`;
+
+  // Create a text box for the notes
+  requestsArray.push({
+    createShape: {
+      objectId: notesObjectId,
+      shapeType: "TEXT_BOX",
+      elementProperties: {
+        pageObjectId: slideObjectId,
+        size: {
+          width: { magnitude: 400, unit: "PT" },
+          height: { magnitude: 50, unit: "PT" },
+        },
+        transform: {
+          scaleX: 1,
+          scaleY: 1,
+          translateX: 50,
+          translateY: 400,
+          unit: "PT",
+        },
+      },
+    },
+  });
+
+  // Add the notes text with a "NOTES:" prefix
+  requestsArray.push({
+    insertText: {
+      objectId: notesObjectId,
+      text: `NOTES: ${speakerNotes}`,
+    },
+  });
+
+  // Style the notes text to be smaller and italic
+  requestsArray.push({
+    updateTextStyle: {
+      objectId: notesObjectId,
+      style: {
+        fontSize: { magnitude: 10, unit: "PT" },
+        italic: true,
+        foregroundColor: {
+          opaqueColor: {
+            rgbColor: { red: 0.5, green: 0.5, blue: 0.5 },
+          },
+        },
+      },
+      textRange: { type: "ALL" },
+      fields: "fontSize,italic,foregroundColor",
+    },
+  });
+
+  console.log(`Added speaker notes as a text box with ID ${notesObjectId}`);
 }
 
 // Expose the results storage for the GET endpoint
