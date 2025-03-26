@@ -49,31 +49,35 @@ export default function Slides() {
         body: JSON.stringify(formData),
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
+        // Extract detailed error information
+        const errorMessage = responseData.error || "Failed to create slides";
+        const errorDetails = responseData.details || "";
+
+        // Set a comprehensive error message
         setError(
-          errorData.error || errorData.details || "Failed to create slides"
+          `${errorMessage}${errorDetails ? `\n\nDetails: ${errorDetails}` : ""}`
         );
-        throw new Error(errorData.error || "Failed to create slides");
+
+        console.error("API Error:", responseData);
+        return;
       }
 
-      const data = await response.json();
-
-      // Check if we have a direct presentation URL
-      if (data.presentationUrl) {
-        // Redirect directly to the Google Slides presentation
-        window.open(data.presentationUrl, "_blank");
+      // Success path
+      if (responseData.presentationUrl) {
+        // Open the presentation in a new tab
+        window.open(responseData.presentationUrl, "_blank");
         // Also redirect to our result page
-        router.push(`/result?id=${data.id}`);
+        router.push(`/result?id=${responseData.id}`);
       } else {
         // Fall back to just the result page
-        router.push(`/result?id=${data.id}`);
+        router.push(`/result?id=${responseData.id}`);
       }
     } catch (err) {
       console.error("Error creating slides:", err);
-      if (!error) {
-        setError("Failed to create slides. Please try again.");
-      }
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -89,7 +93,7 @@ Format your response as markdown with the following structure:
 
 > Speaker notes: Additional context or notes for the presenter
 
----
+===SLIDE===
 
 # Slide 2: Content Slide
 
@@ -98,14 +102,14 @@ Format your response as markdown with the following structure:
 
 > Speaker notes: More context
 
----
+===SLIDE===
 
 My presentation title: ${formData.title}
 
 Content:
 ${formData.markdownContent}
 
-Each slide should be separated by "---" on its own line.
+Each slide should be separated by "===SLIDE===" on its own line.
 Include appropriate slide titles, content, and speaker notes.
 Ensure the presentation flows logically and maintains a consistent style.`;
 
@@ -150,7 +154,8 @@ Ensure the presentation flows logically and maintains a consistent style.`;
                   Presentation Content (Markdown)
                 </label>
                 <div className="mb-2 text-sm text-gray-600">
-                  Use markdown format with &quot;---&quot; to separate slides.{" "}
+                  Use markdown format with &quot;===SLIDE===&quot; to separate
+                  slides.{" "}
                   <button
                     type="button"
                     className="text-blue-600 underline"
@@ -170,7 +175,8 @@ Ensure the presentation flows logically and maintains a consistent style.`;
                       <li>Use &quot;- Point&quot; for bullet points</li>
                       <li>Use &quot;1. Point&quot; for numbered lists</li>
                       <li>
-                        Use &quot;---&quot; on a new line to separate slides
+                        Use &quot;===SLIDE===&quot; on a new line to separate
+                        slides
                       </li>
                       <li>Use &quot;&gt; Note&quot; for speaker notes</li>
                     </ul>
@@ -179,11 +185,11 @@ Ensure the presentation flows logically and maintains a consistent style.`;
                         # Introduction{"\n"}- Welcome to our presentation{"\n"}-
                         Today we'll discuss key points{"\n"}
                         &gt; Introduce team members here{"\n"}
-                        {"\n"}---{"\n"}
+                        {"\n"}===SLIDE==={"\n"}
                         {"\n"}# Main Topic{"\n"}
                         1. First important point{"\n"}
                         2. Second important point{"\n"}
-                        {"\n"}---{"\n"}
+                        {"\n"}===SLIDE==={"\n"}
                         {"\n"}# Conclusion{"\n"}- Summary of key takeaways{"\n"}
                         - Next steps
                       </pre>
@@ -276,7 +282,9 @@ Ensure the presentation flows logically and maintains a consistent style.`;
               <li>Keep each slide focused on a single main idea</li>
               <li>Use bullet points for clarity - avoid long paragraphs</li>
               <li>Include speaker notes for additional context</li>
-              <li>Separate slides with &quot;---&quot; on its own line</li>
+              <li>
+                Separate slides with &quot;===SLIDE===&quot; on its own line
+              </li>
             </ul>
           </div>
 

@@ -52,6 +52,15 @@ export default async function handler(req, res) {
     // Parse markdown content into slides
     const slideContents = parseMarkdownToSlides(markdownContent);
 
+    console.log(`Parsed ${slideContents.length} slides from markdown`);
+    slideContents.forEach((slide, index) => {
+      console.log(`Slide ${index + 1} content:`, {
+        title: slide.title,
+        contentLength: slide.content.length,
+        hasNotes: slide.speakerNotes.length > 0,
+      });
+    });
+
     try {
       // STEP 1: Create an empty presentation with just the title
       console.log("Creating presentation with title:", title);
@@ -64,120 +73,159 @@ export default async function handler(req, res) {
       const presentationId = createResponse.data.presentationId;
       console.log("Presentation created with ID:", presentationId);
 
-      // STEP 2: Get the default slide ID to remove it later
+      // STEP 2: Get the presentation details
       const presentation = await slides.presentations.get({
         presentationId: presentationId,
       });
 
+      // Get the ID of the default slide to remove it later
       const defaultSlideId = presentation.data.slides[0].objectId;
 
       // STEP 3: Add slides based on markdown content
       console.log("Adding slides to presentation...");
 
-      // Prepare batch update requests
+      // Create a new slide for each content item
       let requests = [];
-
-      // Add each slide from the parsed markdown
       slideContents.forEach((slide, index) => {
+        // Create a new slide
         requests.push({
           createSlide: {
             objectId: `slide_${index}`,
+            insertionIndex: index,
             slideLayoutReference: {
               predefinedLayout: "TITLE_AND_BODY",
             },
-            placeholderIdMappings: [
-              {
-                layoutPlaceholder: {
-                  type: "TITLE",
-                  index: 0,
-                },
-                objectId: `title_${index}`,
-              },
-              {
-                layoutPlaceholder: {
-                  type: "BODY",
-                  index: 0,
-                },
-                objectId: `body_${index}`,
-              },
-            ],
           },
         });
+      });
 
-        // Add title text
-        requests.push({
-          insertText: {
-            objectId: `title_${index}`,
-            text: slide.title,
-          },
-        });
+      // Execute the batch update to create all slides
+      console.log(`Creating ${requests.length} slides`);
+      const createSlidesResponse = await slides.presentations.batchUpdate({
+        presentationId: presentationId,
+        requestBody: {
+          requests: requests,
+        },
+      });
 
-        // Add body text
-        requests.push({
-          insertText: {
-            objectId: `body_${index}`,
-            text: slide.content,
-          },
-        });
+      // Get the updated presentation to find the elements
+      const updatedPresentation = await slides.presentations.get({
+        presentationId: presentationId,
+      });
 
-        // Add speaker notes if present
-        if (slide.speakerNotes) {
-          requests.push({
-            createSheetsChart: {
-              objectId: `notes_${index}`,
-              spreadsheetId: "notes",
-              chartId: 0,
-              linkingMode: "NOT_LINKED_IMAGE",
-              elementProperties: {
-                pageObjectId: `slide_${index}`,
-                size: {
-                  width: {
-                    magnitude: 0,
-                    unit: "PT",
-                  },
-                  height: {
-                    magnitude: 0,
-                    unit: "PT",
-                  },
-                },
-                transform: {
-                  scaleX: 1,
-                  scaleY: 1,
-                  translateX: 0,
-                  translateY: 0,
-                  unit: "PT",
-                },
-              },
+      console.log(
+        `Presentation has ${updatedPresentation.data.slides.length} slides`
+      );
+
+      // Now prepare requests to update content
+      let contentRequests = [];
+
+      // For each slide, find its elements and update them
+      // Skip the default slide (usually the first one)
+      const createdSlides = updatedPresentation.data.slides.filter(
+        (slide) => slide.objectId !== defaultSlideId
+      );
+
+      console.log(`Found ${createdSlides.length} created slides to update`);
+
+      createdSlides.forEach((slideObj, index) => {
+        console.log(
+          `Updating slide ${index + 1} with objectId ${slideObj.objectId}`
+        );
+
+        // Get the corresponding content
+        const slideContent = slideContents[index];
+        if (!slideContent) {
+          console.log(`No content found for slide ${index + 1}`);
+          return;
+        }
+
+        // Find title and body placeholders
+        const titlePlaceholder = slideObj.pageElements.find(
+          (el) =>
+            el.shape &&
+            el.shape.placeholder &&
+            el.shape.placeholder.type === "TITLE"
+        );
+
+        const bodyPlaceholder = slideObj.pageElements.find(
+          (el) =>
+            el.shape &&
+            el.shape.placeholder &&
+            el.shape.placeholder.type === "BODY"
+        );
+
+        console.log(
+          `Title placeholder: ${titlePlaceholder ? "found" : "not found"}`
+        );
+        console.log(
+          `Body placeholder: ${bodyPlaceholder ? "found" : "not found"}`
+        );
+
+        // Update title
+        if (titlePlaceholder) {
+          contentRequests.push({
+            insertText: {
+              objectId: titlePlaceholder.objectId,
+              text: slideContent.title,
+              insertionIndex: 0,
+            },
+          });
+        }
+
+        // Update body
+        if (bodyPlaceholder) {
+          contentRequests.push({
+            insertText: {
+              objectId: bodyPlaceholder.objectId,
+              text: slideContent.content,
+              insertionIndex: 0,
             },
           });
 
-          // Add speaker notes
-          requests.push({
-            createParagraphBullets: {
-              objectId: `slide_${index}`,
-              textRange: {
-                type: "FIXED_RANGE",
-                startIndex: 0,
-                endIndex: slide.speakerNotes.length,
+          // Format bullet points if needed
+          if (slideContent.content.includes("- ")) {
+            contentRequests.push({
+              createParagraphBullets: {
+                objectId: bodyPlaceholder.objectId,
+                textRange: {
+                  type: "ALL",
+                },
+                bulletPreset: "BULLET_DISC_CIRCLE_SQUARE",
               },
-              bulletPreset: "BULLET_DISC_CIRCLE_SQUARE",
+            });
+          }
+        }
+
+        // Add speaker notes
+        if (slideContent.speakerNotes && slideContent.speakerNotes.trim()) {
+          console.log(`Adding speaker notes to slide ${index + 1}`);
+          contentRequests.push({
+            insertText: {
+              objectId: slideObj.objectId,
+              text: slideContent.speakerNotes,
+              insertionIndex: 0,
+              speakerNotesObjectId: slideObj.objectId,
             },
           });
         }
       });
 
-      // Remove the default slide
-      requests.push({
+      // Delete the default slide
+      contentRequests.push({
         deleteObject: {
           objectId: defaultSlideId,
         },
       });
 
-      // Execute the batch update
-      const batchUpdateResponse = await slides.presentations.batchUpdate({
+      console.log(
+        `Executing ${contentRequests.length} content update requests`
+      );
+      // Execute the content update batch
+      const contentUpdateResponse = await slides.presentations.batchUpdate({
         presentationId: presentationId,
         requestBody: {
-          requests: requests,
+          requests: contentRequests,
         },
       });
 
@@ -238,13 +286,14 @@ export default async function handler(req, res) {
 
 // Helper function to parse markdown content into slides
 function parseMarkdownToSlides(markdownContent) {
-  // Split the markdown by slide separator
-  const slideTexts = markdownContent.split(/\n\s*---\s*\n/);
+  // Use a more unique separator pattern: "===SLIDE==="
+  const slideTexts = markdownContent.split(/\n\s*===SLIDE===\s*\n/);
+  console.log(`Found ${slideTexts.length} slides in markdown content`);
 
   // Process each slide
-  return slideTexts.map((slideText) => {
-    const lines = slideText.trim().split("\n");
-    let title = "Untitled Slide";
+  return slideTexts.map((slideText, index) => {
+    console.log(`Processing slide ${index + 1}`);
+    let title = `Slide ${index + 1}`;
     let content = "";
     let speakerNotes = "";
 
@@ -267,6 +316,12 @@ function parseMarkdownToSlides(markdownContent) {
       // Remove speaker notes from content
       content = content.replace(/>\s+(.+)$/gm, "").trim();
     }
+
+    console.log(
+      `Slide ${index + 1} processed: title="${title}", content length=${
+        content.length
+      }, has notes=${speakerNotes.length > 0}`
+    );
 
     return {
       title,
