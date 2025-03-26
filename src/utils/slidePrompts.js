@@ -6,17 +6,20 @@ export const slideExamples = {
     title: "Introduction",
     bullets: ["Welcome to our presentation", "Today we'll discuss key points"],
     speakerNotes: "Introduce team members here",
+    imagePrompt: "A professional team meeting in a modern office setting",
   },
   mainTopic: {
     title: "Main Topic",
     numberedPoints: ["First important point", "Second important point"],
     speakerNotes:
       "Explain the details of each point\nAdd any additional context for the presenter",
+    imagePrompt: "Detailed diagram showing the concept in action",
   },
   conclusion: {
     title: "Conclusion",
     bullets: ["Summary of key takeaways", "Next steps"],
     speakerNotes: "",
+    imagePrompt: "",
   },
 };
 
@@ -33,6 +36,7 @@ export function getExampleMarkdown() {
 - ${intro.bullets[0]}
 - ${intro.bullets[1]}
 > ${intro.speakerNotes}
+!> ${intro.imagePrompt}
 
 ===SLIDE===
 
@@ -43,6 +47,10 @@ export function getExampleMarkdown() {
 >>> SPEAKER NOTES >>>
 ${main.speakerNotes}
 <<< SPEAKER NOTES <<<
+
+<IMAGE PROMPT>
+${main.imagePrompt}
+</IMAGE PROMPT>
 
 ===SLIDE===
 
@@ -69,5 +77,7 @@ ${formData.markdownContent}
 
 Each slide should be separated by "===SLIDE===" on its own line.
 Include appropriate slide titles, content, and speaker notes.
+You can also add image prompts using "!>" or ">>> IMAGE PROMPT >>>" format.
+These will be used to generate images for the slides.
 Ensure the presentation flows logically and maintains a consistent style.`;
 }

@@ -175,6 +175,23 @@ export default function Slides() {
                           </li>
                         </ul>
                       </li>
+                      <li>
+                        For image prompts, use either:
+                        <ul className="list-disc pl-5 mt-1">
+                          <li>
+                            <code>!&gt; Your image prompt</code> (simple format)
+                          </li>
+                          <li>
+                            Or for multi-line prompts:
+                            <pre className="mt-1 text-xs bg-gray-100 p-1 rounded">
+                              &lt;IMAGE PROMPT&gt;{"\n"}
+                              Your image prompt here....{"\n"}
+                              More details on another line{"\n"}
+                              &lt;/IMAGE PROMPT&gt;
+                            </pre>
+                          </li>
+                        </ul>
+                      </li>
                     </ul>
                     <div className="mt-2 p-2 bg-gray-100 rounded">
                       <pre className="text-xs text-gray-800">

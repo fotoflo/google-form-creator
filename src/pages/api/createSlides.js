@@ -208,6 +208,111 @@ export default async function handler(req, res) {
             });
           }
         }
+
+        // Add image prompt box if present
+        if (slideContent.imagePrompt && slideContent.imagePrompt.trim()) {
+          console.log(`Adding image prompt to slide ${index + 1}`);
+
+          const promptObjectId = `image_prompt_${slideObj.objectId}`;
+
+          // Create a colored box for the image prompt at the bottom right
+          contentRequests.push({
+            createShape: {
+              objectId: promptObjectId,
+              shapeType: "RECTANGLE",
+              elementProperties: {
+                pageObjectId: slideObj.objectId,
+                size: {
+                  width: { magnitude: 200, unit: "PT" },
+                  height: { magnitude: 80, unit: "PT" },
+                },
+                transform: {
+                  scaleX: 1,
+                  scaleY: 1,
+                  translateX: 500, // Position at bottom right
+                  translateY: 320,
+                  unit: "PT",
+                },
+              },
+            },
+          });
+
+          // Add a light purple fill to the box
+          contentRequests.push({
+            updateShapeProperties: {
+              objectId: promptObjectId,
+              shapeProperties: {
+                shapeBackgroundFill: {
+                  solidFill: {
+                    color: {
+                      rgbColor: {
+                        red: 0.9,
+                        green: 0.8,
+                        blue: 1.0,
+                      },
+                    },
+                  },
+                },
+              },
+              fields: "shapeBackgroundFill",
+            },
+          });
+
+          // Add a border to the box
+          contentRequests.push({
+            updateShapeProperties: {
+              objectId: promptObjectId,
+              shapeProperties: {
+                outline: {
+                  outlineFill: {
+                    solidFill: {
+                      color: {
+                        rgbColor: {
+                          red: 0.6,
+                          green: 0.4,
+                          blue: 0.8,
+                        },
+                      },
+                    },
+                  },
+                  weight: {
+                    magnitude: 1,
+                    unit: "PT",
+                  },
+                },
+              },
+              fields: "outline",
+            },
+          });
+
+          // Add the image prompt text with an "IMAGE:" prefix
+          contentRequests.push({
+            insertText: {
+              objectId: promptObjectId,
+              text: `IMAGE: ${slideContent.imagePrompt}`,
+            },
+          });
+
+          // Style the image prompt text
+          contentRequests.push({
+            updateTextStyle: {
+              objectId: promptObjectId,
+              style: {
+                fontSize: { magnitude: 10, unit: "PT" },
+                foregroundColor: {
+                  opaqueColor: {
+                    rgbColor: { red: 0.3, green: 0.1, blue: 0.5 },
+                  },
+                },
+                bold: true,
+              },
+              textRange: { type: "ALL" },
+              fields: "fontSize,foregroundColor,bold",
+            },
+          });
+
+          console.log(`Added image prompt box with ID ${promptObjectId}`);
+        }
       });
 
       // Delete the default slide
@@ -417,6 +522,7 @@ function parseMarkdownToSlides(markdownContent) {
     let title = `Slide ${index + 1}`;
     let content = "";
     let speakerNotes = "";
+    let imagePrompt = "";
 
     // Extract title - look for lines starting with "Slide X:" or "# "
     const titleMatch = slideText.match(/^(?:Slide \d+:|#)\s+(.+)$/m);
@@ -428,7 +534,62 @@ function parseMarkdownToSlides(markdownContent) {
       content = slideText.trim();
     }
 
-    // Extract speaker notes using the stronger delimiter
+    // First, extract image prompts to prevent them from being captured as speaker notes
+    // Look for content between <IMAGE PROMPT> and </IMAGE PROMPT>
+    const imagePromptRegex = /<IMAGE\s*PROMPT>([\s\S]*?)<\/IMAGE\s*PROMPT>/i;
+    const imagePromptMatch = content.match(imagePromptRegex);
+
+    if (imagePromptMatch) {
+      imagePrompt = imagePromptMatch[1].trim();
+      // Remove the image prompt section from content
+      content = content.replace(imagePromptRegex, "").trim();
+      console.log(
+        `Found image prompt with <IMAGE PROMPT> tags: "${imagePrompt.substring(
+          0,
+          50
+        )}${imagePrompt.length > 50 ? "..." : ""}"`
+      );
+    }
+
+    // Also support the old formats for backward compatibility
+    // Look for content between >>> IMAGE PROMPT >>> and <<< IMAGE PROMPT <<<
+    if (!imagePrompt) {
+      const oldImagePromptRegex =
+        />>>\s*IMAGE\s*PROMPT\s*>>>([\s\S]*?)<<<\s*IMAGE\s*PROMPT\s*<<</i;
+      const oldImagePromptMatch = content.match(oldImagePromptRegex);
+
+      if (oldImagePromptMatch) {
+        imagePrompt = oldImagePromptMatch[1].trim();
+        // Remove the image prompt section from content
+        content = content.replace(oldImagePromptRegex, "").trim();
+        console.log(
+          `Found image prompt with old delimiter: "${imagePrompt.substring(
+            0,
+            50
+          )}${imagePrompt.length > 50 ? "..." : ""}"`
+        );
+      }
+    }
+
+    // Alternative format: lines starting with !>
+    const altImagePromptRegex = /!>\s+(.+)$/gm;
+    const altImagePromptMatches = [...content.matchAll(altImagePromptRegex)];
+
+    if (altImagePromptMatches.length > 0) {
+      // Only set imagePrompt if it wasn't already set by the delimiter method
+      if (!imagePrompt) {
+        imagePrompt = altImagePromptMatches.map((match) => match[1]).join("\n");
+        console.log(
+          `Found image prompt with !> format: "${imagePrompt.substring(0, 50)}${
+            imagePrompt.length > 50 ? "..." : ""
+          }"`
+        );
+      }
+      // Always remove the !> lines from content
+      content = content.replace(/!>\s+(.+)$/gm, "").trim();
+    }
+
+    // Now extract speaker notes after image prompts have been removed
     // Look for content between >>> SPEAKER NOTES >>> and <<< SPEAKER NOTES <<<
     const strongNotesRegex =
       />>>\s*SPEAKER\s*NOTES\s*>>>([\s\S]*?)<<<\s*SPEAKER\s*NOTES\s*<<</i;
@@ -439,39 +600,48 @@ function parseMarkdownToSlides(markdownContent) {
       // Remove the speaker notes section from content
       content = content.replace(strongNotesRegex, "").trim();
       console.log(
-        `Found speaker notes with strong delimiter: "${speakerNotes.substring(
-          0,
-          50
-        )}${speakerNotes.length > 50 ? "..." : ""}"`
+        `Found speaker notes with delimiter: "${speakerNotes.substring(0, 50)}${
+          speakerNotes.length > 50 ? "..." : ""
+        }"`
       );
-    } else {
-      // Fall back to the traditional format (lines starting with >)
-      const traditionalNotesRegex = />\s+(.+)$/gm;
-      const traditionalNotesMatches = [
-        ...content.matchAll(traditionalNotesRegex),
-      ];
+    }
 
-      if (traditionalNotesMatches.length > 0) {
+    // Fall back to the traditional format (lines starting with >)
+    // But make sure they don't start with !> which is for image prompts
+    const traditionalNotesRegex = /^>\s+(?!!>)(.+)$/gm;
+    const traditionalNotesMatches = [
+      ...content.matchAll(traditionalNotesRegex),
+    ];
+
+    if (traditionalNotesMatches.length > 0) {
+      // Only set speakerNotes if it wasn't already set by the delimiter method
+      if (!speakerNotes) {
         speakerNotes = traditionalNotesMatches
           .map((match) => match[1])
           .join("\n");
-        // Remove speaker notes from content
-        content = content.replace(/>\s+(.+)$/gm, "").trim();
         console.log(
-          `Found speaker notes with traditional format: "${speakerNotes.substring(
+          `Found speaker notes with > format: "${speakerNotes.substring(
             0,
             50
           )}${speakerNotes.length > 50 ? "..." : ""}"`
         );
       }
+      // Always remove the > lines from content
+      content = content.replace(/^>\s+(?!!>)(.+)$/gm, "").trim();
     }
 
-    // Additional cleanup for any remaining speaker notes markers
+    // Additional cleanup for any remaining markers
     content = content.replace(/SPEAKER\s*NOTES\s*>>.*$/gm, "").trim();
     content = content.replace(/<<<\s*SPEAKER\s*NOTES\s*<<<.*$/gm, "").trim();
+    content = content.replace(/IMAGE\s*PROMPT\s*>>.*$/gm, "").trim();
+    content = content.replace(/<<<\s*IMAGE\s*PROMPT\s*<<<.*$/gm, "").trim();
+    content = content.replace(/<IMAGE\s*PROMPT>.*$/gm, "").trim();
+    content = content.replace(/<\/IMAGE\s*PROMPT>.*$/gm, "").trim();
 
-    // Clean up any lines that just contain "SPEAKER NOTES" text
+    // Clean up any lines that just contain marker text
     content = content.replace(/^.*SPEAKER\s*NOTES.*$/gm, "").trim();
+    content = content.replace(/^.*IMAGE\s*PROMPT.*$/gm, "").trim();
+    content = content.replace(/^.*<\/?IMAGE\s*PROMPT>.*$/gm, "").trim();
 
     // Remove any empty lines at the beginning or end
     content = content.replace(/^\s+|\s+$/g, "");
@@ -479,13 +649,16 @@ function parseMarkdownToSlides(markdownContent) {
     console.log(
       `Slide ${index + 1} processed: title="${title}", content length=${
         content.length
-      }, has notes=${speakerNotes.length > 0}`
+      }, has notes=${speakerNotes.length > 0}, has image prompt=${
+        imagePrompt.length > 0
+      }`
     );
 
     return {
       title,
       content,
       speakerNotes,
+      imagePrompt,
     };
   });
 }
