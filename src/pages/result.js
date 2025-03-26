@@ -3,7 +3,13 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import TopNav from "../components/TopNav";
 import ReactMarkdown from "react-markdown";
-import { FiExternalLink, FiCopy, FiArrowLeft, FiCheck } from "react-icons/fi";
+import {
+  FiExternalLink,
+  FiCopy,
+  FiArrowLeft,
+  FiCheck,
+  FiTrash2,
+} from "react-icons/fi";
 
 export default function Result() {
   const router = useRouter();
@@ -13,6 +19,8 @@ export default function Result() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     if (!id) return;
@@ -44,6 +52,37 @@ export default function Result() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDelete = async () => {
+    if (!result || !result.presentationId) return;
+
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this presentation? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    setDeleting(true);
+    setDeleteError("");
+
+    try {
+      const response = await fetch(`/api/deleteResult?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete the presentation");
+      }
+
+      router.push("/");
+    } catch (err) {
+      console.error("Error deleting presentation:", err);
+      setDeleteError("Failed to delete the presentation. Please try again.");
+      setDeleting(false);
+    }
+  };
+
   const renderGoogleSlides = () => {
     if (!result || !result.presentationId) return null;
 
@@ -53,7 +92,7 @@ export default function Result() {
           <h2 className="text-2xl font-bold mb-4">{result.title}</h2>
 
           <div className="mb-6">
-            <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden border border-gray-200">
+            <div className="rounded-lg overflow-hidden border border-gray-200 h-[600px]">
               <iframe
                 src={`https://docs.google.com/presentation/d/${result.presentationId}/embed?start=false&loop=false&delayms=3000`}
                 frameBorder="0"
@@ -86,14 +125,39 @@ export default function Result() {
 
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-xl font-semibold mb-4">Presentation Details</h3>
+          {deleteError && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+              {deleteError}
+            </div>
+          )}
           <div className="space-y-2 text-gray-700">
             <p>
               <strong>Created:</strong>{" "}
               {new Date(result.timestamp).toLocaleString()}
             </p>
-            <p>
-              <strong>ID:</strong> {result.presentationId}
-            </p>
+            <div className="flex items-center">
+              <p className="flex items-center">
+                <strong>ID:</strong>{" "}
+                <a
+                  href={`https://docs.google.com/presentation/d/${result.presentationId}/edit`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline ml-1"
+                >
+                  {result.presentationId}
+                </a>
+              </p>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className={`ml-2 p-1.5 rounded-full text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors ${
+                  deleting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                title="Delete presentation"
+              >
+                <FiTrash2 className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -116,11 +180,11 @@ export default function Result() {
           </h2>
 
           <div className="mb-6">
-            <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden border border-gray-200">
+            <div className="rounded-lg overflow-hidden border border-gray-200 h-[800px]">
               <iframe
                 src={`https://docs.google.com/forms/d/${formId}/viewform?embedded=true`}
                 frameBorder="0"
-                className="w-full min-h-[500px]"
+                className="w-full h-full"
               >
                 Loading form...
               </iframe>
@@ -409,7 +473,7 @@ export default function Result() {
         <div className="mt-12 text-center">
           <button
             onClick={() => router.push("/")}
-            className="px-6 py-2.5 bg-gray-800 text-white rounded-md hover:bg-gray-900 transition-colors"
+            className="px-6 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             Create Something New
           </button>
