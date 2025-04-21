@@ -1,5 +1,4 @@
-@tailwind base;
-@tailwind components;
+@import "tailwindcss/preflight";
 @tailwind utilities;
 
 /* Fix for potential white overlay */
@@ -9,6 +8,7 @@ html {
   margin: 0;
   padding: 0;
   background-color: #f9fafb; /* Light gray background */
+  color: #111827;
 }
 
 /* Ensure content is visible */
@@ -63,13 +63,11 @@ h4,
 h5,
 h6 {
   font-weight: 700;
-  color: #111827;
 }
 
 input,
 textarea,
 select {
-  color: #111827;
   font-weight: 500;
 }
 
@@ -80,6 +78,5 @@ select {
 /* Make sure form inputs are clearly visible */
 input::placeholder,
 textarea::placeholder {
-  color: #000000;
   opacity: 1;
 }
