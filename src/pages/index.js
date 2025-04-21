@@ -552,11 +552,13 @@ export default function Home() {
 
         <div className="text-center max-w-2xl">
           <h1 className="text-4xl font-bold text-gray-900 mb-6">
-            Welcome to AI Document Creator
+            Welcome to Prompt2Doc
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Create professional presentations, forms, and documents with the
-            help of AI in just a few clicks.
+            The AI document creator that lets you prompt and develop documents
+            on your own AI, and then convert them to Google Docs, Slides, and
+            Forms. Create professional presentations, forms, and documents with
+            just a few clicks
           </p>
           <button
             onClick={() => signIn("google")}

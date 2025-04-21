@@ -67,15 +67,15 @@ export default function Documents() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Head>
-        <title>Create Document | AI Document Creator</title>
-        <meta name="description" content="Create Google Docs with AI" />
+        <title>Create Document | Prompt2Doc</title>
+        <meta name="description" content="Create Google Docs with Prompt2Doc" />
       </Head>
 
       <TopNav />
 
       <main className="max-w-4xl mx-auto py-10 px-4">
         <h1 className="text-3xl font-bold text-center mb-8">
-          Create a Google Document
+          Create a Document with Prompt2Doc
         </h1>
 
         {error && (
@@ -143,7 +143,7 @@ export default function Documents() {
                 required
                 rows={6}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="Describe the document you want to create. For example: 'A research report on renewable energy sources, focusing on solar and wind power, their current adoption rates, and future potential.'"
+                placeholder="Describe the document you want Prompt2Doc to create. For example: 'A research report on renewable energy sources, focusing on solar and wind power, their current adoption rates, and future potential.'"
               ></textarea>
             </div>
 
@@ -163,7 +163,7 @@ export default function Documents() {
       </main>
 
       <footer className="py-6 text-center text-gray-500 text-sm">
-        <p>© {new Date().getFullYear()} AI Document Creator</p>
+        <p>© {new Date().getFullYear()} Prompt2Doc</p>
       </footer>
     </div>
   );
