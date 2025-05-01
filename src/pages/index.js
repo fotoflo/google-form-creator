@@ -205,9 +205,10 @@ Format your response in a way that's optimized for Prompt2Doc to convert into a 
               <pre className="text-gray-600 font-mono text-sm whitespace-pre-wrap">
                 Please help me structure the following content for a [Google
                 Doc/Presentation/Form/Sheet]: [Paste your content or describe
-                what you need] Format your response in a way that's optimized
-                for Prompt2Doc to convert into a professional document. Include
-                all necessary sections, formatting, and organization.
+                what you need] Format your response in a way that&apos;s
+                optimized for Prompt2Doc to convert into a professional
+                document. Include all necessary sections, formatting, and
+                organization.
               </pre>
               <button
                 onClick={copyPrompt}
