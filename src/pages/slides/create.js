@@ -1,20 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import React from "react";
 import { useSession } from "next-auth/react";
-import Layout from "../components/Layout";
+import Layout from "../../components/Layout";
+import { SkeletonForm } from "../../components/Skeleton";
+import LoginModal from "../../components/LoginModal";
 import {
   generateSlidesPrompt,
   getExampleMarkdown,
-} from "../utils/slidePrompts";
+} from "../../utils/slidePrompts";
 
-export default function Slides() {
+export default function CreateSlides() {
   const { status } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [formData, setFormData] = useState({
-    title: "",
+    title: "My Presentation",
     markdownContent: "",
   });
   const [showInstructions, setShowInstructions] = useState(false);
@@ -25,6 +28,16 @@ export default function Slides() {
 
   // Generate the prompt using the utility function
   const promptToCopy = generateSlidesPrompt(formData);
+
+  // Handle URL parameters for pre-filled content
+  useEffect(() => {
+    if (router.query.prompt) {
+      setFormData((prev) => ({
+        ...prev,
+        markdownContent: decodeURIComponent(router.query.prompt),
+      }));
+    }
+  }, [router.query.prompt]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,6 +50,11 @@ export default function Slides() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (status !== "authenticated") {
+      setShowLoginModal(true);
+      return;
+    }
 
     // Validate form
     if (!formData.title.trim()) {
@@ -62,27 +80,19 @@ export default function Slides() {
       const responseData = await response.json();
 
       if (!response.ok) {
-        // Extract detailed error information
         const errorMessage = responseData.error || "Failed to create slides";
         const errorDetails = responseData.details || "";
-
-        // Set a comprehensive error message
         setError(
           `${errorMessage}${errorDetails ? `\n\nDetails: ${errorDetails}` : ""}`
         );
-
         console.error("API Error:", responseData);
         return;
       }
 
-      // Success path
       if (responseData.presentationUrl) {
-        // Open the presentation in a new tab
         window.open(responseData.presentationUrl, "_blank");
-        // Also redirect to our result page
         router.push(`/result?id=${responseData.id}`);
       } else {
-        // Fall back to just the result page
         router.push(`/result?id=${responseData.id}`);
       }
     } catch (err) {
@@ -99,7 +109,12 @@ export default function Slides() {
       description="Create Google Slides presentations with AI"
     >
       {status === "loading" ? (
-        <div className="text-center py-4">Loading...</div>
+        <>
+          <h1 className="text-3xl font-bold text-center mb-8">
+            Create Google Slides Presentation
+          </h1>
+          <SkeletonForm />
+        </>
       ) : (
         <>
           <h1 className="text-3xl font-bold text-center mb-8">
@@ -108,6 +123,33 @@ export default function Slides() {
 
           <div className="bg-white p-6 rounded-lg shadow-md">
             <form onSubmit={handleSubmit}>
+              <div className="mb-6">
+                <h3 className="font-medium mb-2">Use ChatGPT</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Copy this prompt to ChatGPT, then paste the JSON response into
+                  our result page.
+                </p>
+
+                <div className="relative">
+                  <textarea
+                    readOnly
+                    value={promptToCopy}
+                    className="w-full h-32 p-3 bg-gray-50 border border-gray-300 rounded-md font-mono text-sm text-gray-800"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(promptToCopy);
+                      setShowToast(true);
+                      setTimeout(() => setShowToast(false), 2000);
+                    }}
+                    className="absolute top-2 right-2 px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
+
               <div className="mb-4">
                 <label
                   htmlFor="title"
@@ -211,91 +253,31 @@ export default function Slides() {
                   placeholder="# Slide 1 Title
 - Bullet point 1
 - Bullet point 2
-> Speaker note
 
----
+===SLIDE===
 
 # Slide 2 Title
 1. Numbered point 1
 2. Numbered point 2"
-                ></textarea>
+                />
               </div>
 
-              <div className="mb-6">
-                <div className="border-t border-b border-gray-200 py-4">
-                  <h3 className="font-medium mb-2">
-                    Option 1: Submit directly
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Submit your content and our AI will format it into slides
-                    for you.
-                  </p>
-
-                  {error && (
-                    <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-                      {error}
-                    </div>
-                  )}
-
-                  <div className="flex justify-center">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-                    >
-                      {loading ? "Creating..." : "Create Presentation"}
-                    </button>
-                  </div>
+              {error && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md text-red-700">
+                  {error}
                 </div>
+              )}
 
-                <div className="pt-4">
-                  <h3 className="font-medium mb-2">Option 2: Use ChatGPT</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Copy this prompt to ChatGPT, then paste the JSON response
-                    into our result page.
-                  </p>
-
-                  <div className="relative">
-                    <textarea
-                      readOnly
-                      value={promptToCopy}
-                      className="w-full h-32 p-3 bg-gray-50 border border-gray-300 rounded-md font-mono text-sm text-gray-800"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        navigator.clipboard.writeText(promptToCopy);
-                        setShowToast(true);
-                        setTimeout(() => setShowToast(false), 2000);
-                      }}
-                      className="absolute top-2 right-2 px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300"
-                    >
-                      Copy
-                    </button>
-                  </div>
-                </div>
+              <div className="flex justify-center">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+                >
+                  {loading ? "Creating..." : "Create Presentation"}
+                </button>
               </div>
             </form>
-          </div>
-
-          <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">
-              Tips for Great Presentations
-            </h2>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Keep each slide focused on a single main idea</li>
-              <li>Use bullet points for clarity - avoid long paragraphs</li>
-              <li>Include speaker notes for additional context</li>
-              <li>
-                Separate slides with &quot;===SLIDE===&quot; on its own line
-              </li>
-            </ul>
-          </div>
-
-          <div className="text-sm text-amber-600 mt-1">
-            <strong>Note:</strong> Due to API limitations, speaker notes will
-            appear as small text boxes at the bottom of slides rather than in
-            the speaker notes section.
           </div>
 
           {showToast && (
@@ -303,6 +285,11 @@ export default function Slides() {
               Prompt copied to clipboard!
             </div>
           )}
+
+          <LoginModal
+            isOpen={showLoginModal}
+            onClose={() => setShowLoginModal(false)}
+          />
         </>
       )}
     </Layout>

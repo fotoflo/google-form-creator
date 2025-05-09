@@ -65,9 +65,11 @@ ${main.imagePrompt}
  * @returns {string} The formatted prompt
  */
 export function generateSlidesPrompt(formData) {
-  return `You're about to create a professional Google Slides presentation from markdown content.
+  return `You are about to create a professional Google Slides presentation from markdown content.  
+If prior conversation context is available, use it to infer the likely topic, structure, and tone of the presentation.  
+If no clear topic or structure can be inferred, begin a structured conversation to help the user define the key elements of the presentation before generating slides.
 
-**Before you begin, ask the user the following questions one at a time:**
+**Before generating slides, ask the user the following questions one at a time:**
 
 1. Who is the target audience for this presentation?  
 2. What tone or visual style should the slides use? (e.g., minimalist, corporate, playful)  

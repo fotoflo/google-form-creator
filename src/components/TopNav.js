@@ -2,6 +2,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSession, signOut } from "next-auth/react";
+import { FiHome, FiLayout, FiList, FiFileText, FiGrid } from "react-icons/fi";
 
 export default function TopNav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,10 +14,19 @@ export default function TopNav() {
   };
 
   const navItems = [
-    { name: "Forms", href: "/", icon: "📝" },
-    { name: "Docs", href: "/docs", icon: "📄" },
-    { name: "Sheets", href: "/sheets", icon: "📊" },
-    { name: "Slides", href: "/slides", icon: "🖼️" },
+    { href: "/", label: "Home", icon: <FiHome className="w-5 h-5" /> },
+    {
+      href: "/slides",
+      label: "Slides",
+      icon: <FiLayout className="w-5 h-5" />,
+    },
+    { href: "/forms", label: "Forms", icon: <FiList className="w-5 h-5" /> },
+    {
+      href: "/documents",
+      label: "Documents",
+      icon: <FiFileText className="w-5 h-5" />,
+    },
+    { href: "/sheets", label: "Sheets", icon: <FiGrid className="w-5 h-5" /> },
   ];
 
   const isActive = (path) => {
@@ -38,7 +48,7 @@ export default function TopNav() {
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {navItems.map((item) => (
                 <Link
-                  key={item.name}
+                  key={item.href}
                   href={item.href}
                   className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                     isActive(item.href)
@@ -47,7 +57,7 @@ export default function TopNav() {
                   }`}
                 >
                   <span className="mr-2">{item.icon}</span>
-                  {item.name}
+                  {item.label}
                 </Link>
               ))}
             </div>
@@ -123,7 +133,7 @@ export default function TopNav() {
         <div className="pt-2 pb-3 space-y-1">
           {navItems.map((item) => (
             <Link
-              key={item.name}
+              key={item.href}
               href={item.href}
               className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
                 isActive(item.href)
@@ -132,7 +142,7 @@ export default function TopNav() {
               }`}
             >
               <span className="mr-2">{item.icon}</span>
-              {item.name}
+              {item.label}
             </Link>
           ))}
         </div>

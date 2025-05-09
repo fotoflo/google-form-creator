@@ -48,11 +48,40 @@ Format your response in a way that's optimized for Prompt2Doc to convert into a 
     setTimeout(() => setPromptCopied(false), 2000);
   };
 
+  const handleSectionClick = (section) => {
+    switch (section) {
+      case "slides":
+        router.push("/slides/create");
+        break;
+      case "forms":
+        router.push("/forms");
+        break;
+      case "documents":
+        router.push("/documents");
+        break;
+      case "sheets":
+        router.push("/sheets");
+        break;
+      default:
+        break;
+    }
+  };
+
   // If loading session, show loading state
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="w-16 h-16 border-4 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-white">
+        <nav className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
+          <div className="flex items-center text-xl font-bold text-gray-900">
+            <span className="mr-2">📄</span>
+            Prompt2Doc
+          </div>
+        </nav>
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="flex justify-center items-center h-[60vh]">
+            <div className="w-16 h-16 border-4 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -251,7 +280,7 @@ Format your response in a way that's optimized for Prompt2Doc to convert into a 
         {/* Document creation options */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div
-            onClick={() => router.push("/slides")}
+            onClick={() => handleSectionClick("slides")}
             className="bg-gray-200 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer border border-gray-300"
           >
             <div className="flex items-center mb-4">
@@ -272,7 +301,7 @@ Format your response in a way that's optimized for Prompt2Doc to convert into a 
           </div>
 
           <div
-            onClick={() => router.push("/forms")}
+            onClick={() => handleSectionClick("forms")}
             className="bg-gray-200 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer border border-gray-300"
           >
             <div className="flex items-center mb-4">
@@ -291,7 +320,7 @@ Format your response in a way that's optimized for Prompt2Doc to convert into a 
           </div>
 
           <div
-            onClick={() => router.push("/documents")}
+            onClick={() => handleSectionClick("documents")}
             className="bg-gray-200 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer border border-gray-300"
           >
             <div className="flex items-center mb-4">
@@ -392,7 +421,7 @@ Format your response in a way that's optimized for Prompt2Doc to convert into a 
               </p>
             </div>
             <button
-              onClick={() => router.push("/slides")}
+              onClick={() => handleSectionClick("slides")}
               className="px-6 py-3 bg-white text-blue-900 rounded-md hover:bg-gray-100 transition-colors flex items-center"
             >
               <FiPlus className="mr-2" /> New Presentation
