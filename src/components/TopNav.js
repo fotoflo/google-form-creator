@@ -1,8 +1,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useSession, signOut } from "next-auth/react";
-import { FiHome, FiLayout, FiList, FiFileText, FiGrid } from "react-icons/fi";
+import { useSession, signOut, signIn } from "next-auth/react";
 
 export default function TopNav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,19 +13,11 @@ export default function TopNav() {
   };
 
   const navItems = [
-    { href: "/", label: "Home", icon: <FiHome className="w-5 h-5" /> },
-    {
-      href: "/slides",
-      label: "Slides",
-      icon: <FiLayout className="w-5 h-5" />,
-    },
-    { href: "/forms", label: "Forms", icon: <FiList className="w-5 h-5" /> },
-    {
-      href: "/documents",
-      label: "Documents",
-      icon: <FiFileText className="w-5 h-5" />,
-    },
-    { href: "/sheets", label: "Sheets", icon: <FiGrid className="w-5 h-5" /> },
+    { href: "/documents", label: "Docs", icon: "📝" },
+    { href: "/sheets", label: "Sheets", icon: "📊" },
+    { href: "/slides", label: "Slides", icon: "🖼️" },
+    { href: "/forms", label: "Forms", icon: "📋" },
+    { href: "/prompts", label: "Prompts", icon: "💡" },
   ];
 
   const isActive = (path) => {
@@ -39,21 +30,21 @@ export default function TopNav() {
     <nav className="bg-white shadow-md relative z-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="text-xl font-bold text-blue-600">
-                Prompt2Doc
-              </Link>
-            </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+          <div className="flex-shrink-0 flex items-center">
+            <Link href="/" className="text-xl font-bold text-gray-900">
+              <span className="mr-2">📄</span>
+              Prompt2Doc
+            </Link>
+          </div>
+
+          <div className="hidden sm:flex sm:items-center sm:space-x-6">
+            <div className="flex space-x-6">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                    isActive(item.href)
-                      ? "border-blue-500 text-gray-900"
-                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                  className={`inline-flex items-center text-gray-600 hover:text-gray-900 ${
+                    isActive(item.href) ? "text-gray-900" : ""
                   }`}
                 >
                   <span className="mr-2">{item.icon}</span>
@@ -61,8 +52,6 @@ export default function TopNav() {
                 </Link>
               ))}
             </div>
-          </div>
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
             {session ? (
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-700">
@@ -76,14 +65,15 @@ export default function TopNav() {
                 </button>
               </div>
             ) : (
-              <Link
-                href="/auth/signin"
-                className="text-sm text-gray-700 hover:text-gray-900"
+              <button
+                onClick={() => signIn("google")}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
               >
-                Sign in
-              </Link>
+                Sign in to Get Started
+              </button>
             )}
           </div>
+
           <div className="-mr-2 flex items-center sm:hidden">
             <button
               onClick={toggleMenu}
@@ -161,12 +151,12 @@ export default function TopNav() {
                 </button>
               </div>
             ) : (
-              <Link
-                href="/auth/signin"
-                className="text-base font-medium text-gray-700 hover:text-gray-900"
+              <button
+                onClick={() => signIn("google")}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
               >
-                Sign in
-              </Link>
+                Sign in to Get Started
+              </button>
             )}
           </div>
         </div>

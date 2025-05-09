@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import Head from "next/head";
-import Link from "next/link";
 import { FiFileText, FiLayout, FiList, FiClock, FiPlus } from "react-icons/fi";
 import TopNav from "../components/TopNav";
 
@@ -71,12 +70,7 @@ Format your response in a way that's optimized for Prompt2Doc to convert into a 
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-white">
-        <nav className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
-          <div className="flex items-center text-xl font-bold text-gray-900">
-            <span className="mr-2">📄</span>
-            Prompt2Doc
-          </div>
-        </nav>
+        <TopNav />
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="flex justify-center items-center h-[60vh]">
             <div className="w-16 h-16 border-4 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
@@ -98,53 +92,7 @@ Format your response in a way that's optimized for Prompt2Doc to convert into a 
           />
         </Head>
 
-        <nav className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
-          <Link
-            href="/"
-            className="flex items-center text-xl font-bold text-gray-900"
-          >
-            <span className="mr-2">📄</span>
-            Prompt2Doc
-          </Link>
-          <div className="flex items-center space-x-6">
-            <div className="hidden md:flex space-x-6">
-              <Link
-                href="/documents"
-                className="text-gray-600 hover:text-gray-900 flex items-center"
-              >
-                <span className="mr-2">📝</span>
-                Docs
-              </Link>
-              <Link
-                href="/sheets"
-                className="text-gray-600 hover:text-gray-900 flex items-center"
-              >
-                <span className="mr-2">📊</span>
-                Sheets
-              </Link>
-              <Link
-                href="/slides"
-                className="text-gray-600 hover:text-gray-900 flex items-center"
-              >
-                <span className="mr-2">🖼️</span>
-                Slides
-              </Link>
-              <Link
-                href="/forms"
-                className="text-gray-600 hover:text-gray-900 flex items-center"
-              >
-                <span className="mr-2">📋</span>
-                Forms
-              </Link>
-            </div>
-            <button
-              onClick={() => signIn("google")}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-            >
-              Sign in to Get Started
-            </button>
-          </div>
-        </nav>
+        <TopNav />
 
         <section className="py-20 px-6 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
