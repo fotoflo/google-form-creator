@@ -21,15 +21,15 @@ export default function AuthedNav() {
       <div className="max-w-7xl mx-auto px-8 flex justify-between items-center h-20">
         {/* Logo */}
         <Link href="/dashboard" className="flex items-center">
-          <Image
-            src="/prompt2doc-logo.png"
-            alt="Prompt2Doc logo"
-            width={200}
-            height={48}
-            priority
-            className="h-16 w-auto"
-            style={{ minWidth: 40 }}
-          />
+          <div className="relative w-[241px] h-[64px]">
+            <Image
+              src="/prompt2doc-logo.png"
+              alt="Prompt2Doc logo"
+              fill
+              sizes="(max-width: 768px) 150px, 241px"
+              style={{ objectFit: "contain" }}
+            />
+          </div>
         </Link>
 
         {/* Desktop nav */}
