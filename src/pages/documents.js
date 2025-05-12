@@ -57,7 +57,7 @@ export default function Documents() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-800 to-purple-600 text-white font-sans overflow-x-hidden">
       <Head>
         <title>Create Document | Prompt2Doc</title>
         <meta name="description" content="Create Google Docs with Prompt2Doc" />
@@ -65,8 +65,8 @@ export default function Documents() {
 
       <TopNav />
 
-      <main className="max-w-4xl mx-auto py-10 px-4">
-        <h1 className="text-3xl font-bold text-center mb-8">
+      <main className="max-w-4xl mx-auto py-10 px-4 mt-20">
+        <h1 className="text-4xl md:text-5xl font-bold text-center mb-8 text-white">
           Create a Document with Prompt2Doc
         </h1>
 
@@ -75,17 +75,17 @@ export default function Documents() {
         ) : (
           <>
             {error && (
-              <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-md">
+              <div className="mb-6 p-4 bg-red-600 text-white rounded-md">
                 {error}
               </div>
             )}
 
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-[rgba(255,255,255,0.1)] backdrop-blur-sm p-6 rounded-lg shadow-md">
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
                   <label
                     htmlFor="title"
-                    className="block text-gray-700 font-medium mb-2"
+                    className="block text-white font-medium mb-2"
                   >
                     Document Title
                   </label>
@@ -96,7 +96,7 @@ export default function Documents() {
                     value={documentData.title}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-[rgba(0,0,0,0.2)] text-white placeholder-gray-300 border-gray-600"
                     placeholder="Enter a title for your document"
                   />
                 </div>
@@ -104,7 +104,7 @@ export default function Documents() {
                 <div className="mb-4">
                   <label
                     htmlFor="type"
-                    className="block text-gray-700 font-medium mb-2"
+                    className="block text-white font-medium mb-2"
                   >
                     Document Type
                   </label>
@@ -113,7 +113,7 @@ export default function Documents() {
                     name="type"
                     value={documentData.type}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-[rgba(0,0,0,0.2)] text-white border-gray-600"
                   >
                     <option value="report">Report</option>
                     <option value="essay">Essay</option>
@@ -127,7 +127,7 @@ export default function Documents() {
                 <div className="mb-6">
                   <label
                     htmlFor="prompt"
-                    className="block text-gray-700 font-medium mb-2"
+                    className="block text-white font-medium mb-2"
                   >
                     What would you like to write about?
                   </label>
@@ -138,7 +138,7 @@ export default function Documents() {
                     onChange={handleChange}
                     required
                     rows={6}
-                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 bg-[rgba(0,0,0,0.2)] text-white placeholder-gray-300 border-gray-600"
                     placeholder="Describe the document you want Prompt2Doc to create. For example: 'A research report on renewable energy sources, focusing on solar and wind power, their current adoption rates, and future potential.'"
                   ></textarea>
                 </div>
@@ -147,7 +147,7 @@ export default function Documents() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors ${
+                    className={`px-8 py-3 bg-white text-indigo-900 rounded-full font-bold hover:bg-gray-100 transition-colors ${
                       loading ? "opacity-70 cursor-not-allowed" : ""
                     }`}
                   >
@@ -160,7 +160,7 @@ export default function Documents() {
         )}
       </main>
 
-      <footer className="py-6 text-center text-gray-500 text-sm">
+      <footer className="py-6 text-center text-gray-300 text-sm">
         <p>© {new Date().getFullYear()} Prompt2Doc</p>
       </footer>
     </div>

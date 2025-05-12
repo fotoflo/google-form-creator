@@ -18,23 +18,17 @@ export default function TopNav() {
   const isLanding = !session && router.pathname === "/";
 
   return (
-    <nav
-      className={
-        isLanding
-          ? "bg-transparent absolute top-0 left-0 w-full z-20"
-          : "bg-white shadow-md relative z-20"
-      }
-    >
+    <nav className="bg-transparent absolute top-0 left-0 w-full z-20 ">
       <div className="max-w-7xl mx-auto px-8 flex justify-between items-center h-20">
         {/* Logo */}
-        <Link href="/" className="flex items-center">
+        <Link href={session ? "/dashboard" : "/"} className="flex items-center">
           <Image
             src="/prompt2doc-logo.png"
             alt="Prompt2Doc logo"
             width={200}
             height={48}
             priority
-            className={isLanding ? "h-18 w-auto" : "h-16 w-auto"}
+            className="h-16 w-auto"
             style={{ minWidth: 40 }}
           />
         </Link>
@@ -97,11 +91,7 @@ export default function TopNav() {
         <div className="-mr-2 flex items-center sm:hidden">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={
-              isLanding
-                ? "inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-white hover:text-purple-700 focus:outline-none"
-                : "inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
-            }
+            className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-white hover:text-purple-700 focus:outline-none"
             aria-expanded={isMenuOpen}
           >
             <span className="sr-only">Open main menu</span>
@@ -154,42 +144,42 @@ export default function TopNav() {
             <>
               <Link
                 href="/documents"
-                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
+                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-white hover:bg-white hover:bg-opacity-10 hover:border-pink-200"
               >
                 <span className="mr-2">📝</span>Docs
               </Link>
               <Link
                 href="/sheets"
-                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
+                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-white hover:bg-white hover:bg-opacity-10 hover:border-pink-200"
               >
                 <span className="mr-2">📊</span>Sheets
               </Link>
               <Link
                 href="/slides"
-                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
+                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-white hover:bg-white hover:bg-opacity-10 hover:border-pink-200"
               >
                 <span className="mr-2">🖼️</span>Slides
               </Link>
               <Link
                 href="/forms"
-                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
+                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-white hover:bg-white hover:bg-opacity-10 hover:border-pink-200"
               >
                 <span className="mr-2">📋</span>Forms
               </Link>
               <Link
                 href="/prompts"
-                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
+                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-white hover:bg-white hover:bg-opacity-10 hover:border-pink-200"
               >
                 <span className="mr-2">💡</span>Prompts
               </Link>
               {session ? (
                 <div className="flex flex-col mt-2">
-                  <span className="text-base font-medium text-gray-800">
+                  <span className="text-base font-medium text-white">
                     {session.user?.name || session.user?.email}
                   </span>
                   <button
                     onClick={() => signOut()}
-                    className="mt-1 text-sm text-gray-600 hover:text-gray-900"
+                    className="mt-1 text-sm text-white hover:text-pink-200"
                   >
                     Sign out
                   </button>
@@ -197,7 +187,7 @@ export default function TopNav() {
               ) : (
                 <button
                   onClick={() => signIn("google")}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors mt-2"
+                  className="w-full px-4 py-2 bg-white text-purple-700 rounded-full font-semibold hover:bg-gray-100 transition-colors mt-2"
                 >
                   Sign in to Get Started
                 </button>

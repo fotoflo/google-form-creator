@@ -34,22 +34,24 @@ export const SkeletonCard = ({ className = "" }) => {
 
 export const SkeletonForm = ({ className = "" }) => {
   return (
-    <div className={`bg-white p-6 rounded-lg shadow-md ${className}`}>
-      <Skeleton className="h-6 w-1/4 mb-6" />
+    <div
+      className={`bg-[rgba(255,255,255,0.1)] p-6 rounded-lg shadow-md ${className}`}
+    >
+      <Skeleton className="h-6 w-1/4 mb-6 bg-gray-400/20" />
       <div className="space-y-6">
         <div>
-          <Skeleton className="h-4 w-1/3 mb-2" />
-          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-4 w-1/3 mb-2 bg-gray-400/20" />
+          <Skeleton className="h-10 w-full bg-gray-400/20" />
         </div>
         <div>
-          <Skeleton className="h-4 w-1/3 mb-2" />
-          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-4 w-1/3 mb-2 bg-gray-400/20" />
+          <Skeleton className="h-10 w-full bg-gray-400/20" />
         </div>
         <div>
-          <Skeleton className="h-4 w-1/3 mb-2" />
-          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-4 w-1/3 mb-2 bg-gray-400/20" />
+          <Skeleton className="h-32 w-full bg-gray-400/20" />
         </div>
-        <Skeleton className="h-10 w-1/3 mx-auto" />
+        <Skeleton className="h-10 w-1/3 mx-auto bg-gray-400/20" />
       </div>
     </div>
   );

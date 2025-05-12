@@ -1,8 +1,11 @@
+import { useState } from "react";
 import Head from "next/head";
 import TopNav from "../components/TopNav";
 import { FiCopy } from "react-icons/fi";
 
 export default function Prompts() {
+  const [copiedIndex, setCopiedIndex] = useState(null);
+
   const examplePrompts = [
     {
       title: "Document Creation",
@@ -36,13 +39,19 @@ Format your response with clear sections for questions, options, and any validat
     },
   ];
 
-  const copyPrompt = (prompt) => {
+  const copyPrompt = (prompt, index) => {
     navigator.clipboard.writeText(prompt);
-    // TODO: Add toast notification
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const handleSuggestPrompt = (e) => {
+    e.preventDefault();
+    window.location.href = "mailto:support@prompt2doc.com";
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-700 to-pink-600 text-white font-sans overflow-x-hidden">
       <Head>
         <title>AI Prompts | Prompt2Doc</title>
         <meta
@@ -53,43 +62,42 @@ Format your response with clear sections for questions, options, and any validat
 
       <TopNav />
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className="max-w-6xl mx-auto px-4 py-8 mt-20">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl font-bold text-white mb-4">
             AI Prompts Collection
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-white/80 max-w-2xl mx-auto">
             Use these pre-made prompts to get the best results from your AI
             assistant. Copy and customize them for your needs.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {examplePrompts.map((prompt, index) => (
+          {examplePrompts.map((promptData, index) => (
             <div
               key={index}
-              className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow p-6"
+              className="bg-[rgba(255,255,255,0.1)] backdrop-blur-sm border border-white/10 rounded-lg shadow-md p-6"
             >
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600 mr-4 text-2xl">
-                  <span role="img" aria-label="lightbulb">
-                    💡
-                  </span>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900">
-                  {prompt.title}
-                </h3>
-              </div>
-              <p className="text-gray-600 mb-4">{prompt.description}</p>
+              <h3 className="text-xl font-semibold text-white mb-3">
+                {promptData.title}
+              </h3>
+              <p className="text-white/80 mb-4">{promptData.description}</p>
               <div className="relative">
-                <pre className="bg-gray-50 p-4 rounded-md text-sm text-gray-800 font-mono whitespace-pre-wrap">
-                  {prompt.prompt}
+                <pre className="bg-[rgba(0,0,0,0.2)] p-4 rounded-md text-white/90 text-sm font-mono whitespace-pre-wrap mb-2">
+                  {promptData.prompt}
                 </pre>
                 <button
-                  onClick={() => copyPrompt(prompt.prompt)}
-                  className="absolute top-2 right-2 p-2 text-gray-500 hover:text-gray-700 bg-white rounded-md shadow-sm hover:shadow transition-shadow"
+                  onClick={() => copyPrompt(promptData.prompt, index)}
+                  className="absolute top-2 right-2 p-2 bg-white/10 hover:bg-white/20 rounded-md transition-colors group"
+                  title="Copy prompt"
                 >
-                  <FiCopy className="w-5 h-5" />
+                  <FiCopy className="w-4 h-4 text-white" />
+                  {copiedIndex === index && (
+                    <span className="absolute -top-8 right-0 bg-black/75 text-white text-xs px-2 py-1 rounded">
+                      Copied!
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
@@ -97,14 +105,12 @@ Format your response with clear sections for questions, options, and any validat
         </div>
 
         <div className="mt-12 text-center">
-          <p className="text-gray-600 mb-4">
+          <p className="text-white/80 mb-4">
             Don&apos;t see what you&apos;re looking for? We&apos;re adding more
             prompts regularly.
           </p>
           <button
-            onClick={() =>
-              (window.location.href = "mailto:support@prompt2doc.com")
-            }
+            onClick={handleSuggestPrompt}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             Suggest a Prompt

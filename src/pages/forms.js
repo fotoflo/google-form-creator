@@ -1,163 +1,131 @@
-import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import TopNav from "../components/TopNav";
-import { SkeletonForm } from "../components/Skeleton";
+import { FiArrowRight } from "react-icons/fi";
 
 export default function Forms() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    prompt: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!session) {
-      router.push("/");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const response = await fetch("/api/create-form", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to create form");
-      }
-
-      // Redirect to the result page
-      router.push(`/result?id=${data.resultId}`);
-    } catch (err) {
-      console.error("Error creating form:", err);
-      setError(err.message || "An error occurred while creating the form");
-      setLoading(false);
+  // Redirect authenticated users to dashboard forms if they prefer
+  const goToDashboard = () => {
+    if (session) {
+      router.push("/dashboard/forms");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-800 to-purple-600 text-white font-sans">
       <Head>
-        <title>Create Form | AI Document Creator</title>
-        <meta name="description" content="Create Google Forms with AI" />
+        <title>Google Forms Creator | Prompt2Doc</title>
+        <meta
+          name="description"
+          content="Create Google Forms easily with AI assistance"
+        />
       </Head>
 
       <TopNav />
 
-      <main className="max-w-4xl mx-auto py-10 px-4">
-        <h1 className="text-3xl font-bold text-center mb-8">
-          Create a Google Form
-        </h1>
+      <main className="max-w-7xl mx-auto px-8 py-16 ">
+        <div className="mt-20"></div>
+        <div className="text-center mb-12">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            Create Google Forms with AI
+          </h1>
+          <p className="text-xl max-w-3xl mx-auto">
+            Build professional forms, surveys, and quizzes in minutes using our
+            AI-powered form generator.
+          </p>
+        </div>
 
-        {status === "loading" ? (
-          <SkeletonForm />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
+          <div className="bg-[rgba(255,255,255,0.1)] backdrop-blur-sm p-8 rounded-lg">
+            <h2 className="text-2xl font-bold mb-4">How It Works</h2>
+            <ol className="space-y-4">
+              <li className="flex items-start">
+                <span className="bg-white text-indigo-900 w-8 h-8 rounded-full flex items-center justify-center mr-3 mt-1 font-bold">
+                  1
+                </span>
+                <p className="text-lg">
+                  Describe the form you need or paste your content into our AI
+                  prompt
+                </p>
+              </li>
+              <li className="flex items-start">
+                <span className="bg-white text-indigo-900 w-8 h-8 rounded-full flex items-center justify-center mr-3 mt-1 font-bold">
+                  2
+                </span>
+                <p className="text-lg">
+                  Our AI analyzes your content and generates a structured Google
+                  Form
+                </p>
+              </li>
+              <li className="flex items-start">
+                <span className="bg-white text-indigo-900 w-8 h-8 rounded-full flex items-center justify-center mr-3 mt-1 font-bold">
+                  3
+                </span>
+                <p className="text-lg">
+                  Review and customize your form before publishing it to Google
+                  Forms
+                </p>
+              </li>
+            </ol>
+          </div>
+
+          <div className="bg-[rgba(255,255,255,0.1)] backdrop-blur-sm p-8 rounded-lg">
+            <h2 className="text-2xl font-bold mb-4">Features</h2>
+            <ul className="space-y-3">
+              <li className="flex items-center text-lg">
+                <span className="text-green-300 mr-2">✓</span>
+                Multiple question types (multiple choice, text, scale, etc.)
+              </li>
+              <li className="flex items-center text-lg">
+                <span className="text-green-300 mr-2">✓</span>
+                Section organization and form logic
+              </li>
+              <li className="flex items-center text-lg">
+                <span className="text-green-300 mr-2">✓</span>
+                Custom form themes and styling
+              </li>
+              <li className="flex items-center text-lg">
+                <span className="text-green-300 mr-2">✓</span>
+                Response validation and required fields
+              </li>
+              <li className="flex items-center text-lg">
+                <span className="text-green-300 mr-2">✓</span>
+                Direct integration with Google Forms
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {session ? (
+          <div className="text-center">
+            <button
+              onClick={goToDashboard}
+              className="px-8 py-4 bg-white text-indigo-900 rounded-full font-bold text-lg hover:bg-gray-100 transition-colors inline-flex items-center"
+            >
+              Create a Form Now <FiArrowRight className="ml-2" />
+            </button>
+            <p className="mt-4 text-sm opacity-80">
+              You&apos;re signed in and ready to create forms!
+            </p>
+          </div>
         ) : (
-          <>
-            {error && (
-              <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-md">
-                {error}
-              </div>
-            )}
-
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label
-                    htmlFor="title"
-                    className="block text-gray-700 font-medium mb-2"
-                  >
-                    Form Title
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter a title for your form"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label
-                    htmlFor="description"
-                    className="block text-gray-700 font-medium mb-2"
-                  >
-                    Form Description (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter a description for your form"
-                  />
-                </div>
-
-                <div className="mb-6">
-                  <label
-                    htmlFor="prompt"
-                    className="block text-gray-700 font-medium mb-2"
-                  >
-                    What kind of form do you want to create?
-                  </label>
-                  <textarea
-                    id="prompt"
-                    name="prompt"
-                    value={formData.prompt}
-                    onChange={handleChange}
-                    required
-                    rows={6}
-                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Describe the form you want to create. For example: 'A customer feedback form for a restaurant with questions about food quality, service, and ambiance.'"
-                  ></textarea>
-                </div>
-
-                <div className="flex justify-center">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className={`px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors ${
-                      loading ? "opacity-70 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    {loading ? "Creating Form..." : "Create Form"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </>
+          <div className="text-center">
+            <p className="mb-4 text-lg">
+              Sign in to start creating AI-powered forms
+            </p>
+            <button
+              onClick={() => router.push("/")}
+              className="px-8 py-4 bg-white text-indigo-900 rounded-full font-bold text-lg hover:bg-gray-100 transition-colors inline-flex items-center"
+            >
+              Get Started <FiArrowRight className="ml-2" />
+            </button>
+          </div>
         )}
       </main>
-
-      <footer className="py-6 text-center text-gray-500 text-sm">
-        <p>© {new Date().getFullYear()} AI Document Creator</p>
-      </footer>
     </div>
   );
 }

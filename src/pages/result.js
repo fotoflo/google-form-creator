@@ -432,7 +432,7 @@ export default function Result() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-700 to-pink-600 text-white font-sans overflow-x-hidden">
       <Head>
         <title>{result?.title || "Result"} | AI Document Creator</title>
         <meta name="description" content="View your generated document" />
@@ -440,11 +440,11 @@ export default function Result() {
 
       <TopNav />
 
-      <main className="max-w-5xl mx-auto py-10 px-4">
+      <main className="max-w-5xl mx-auto py-10 px-4 mt-20">
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+            className="flex items-center gap-2 text-white hover:text-pink-200"
           >
             <FiArrowLeft /> Back
           </button>
@@ -452,16 +452,16 @@ export default function Result() {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
-            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-            <p className="mt-4 text-gray-600">Loading your content...</p>
+            <div className="w-16 h-16 border-4 border-pink-200 border-t-pink-400 rounded-full animate-spin"></div>
+            <p className="mt-4 text-white/80">Loading your content...</p>
           </div>
         ) : error ? (
-          <div className="bg-red-100 p-6 rounded-lg text-red-700 shadow-md">
+          <div className="bg-[rgba(255,255,255,0.1)] p-6 rounded-lg text-white shadow-md">
             <h2 className="text-xl font-bold mb-2">Error</h2>
             <p>{error}</p>
             <button
               onClick={() => router.push("/")}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              className="mt-4 px-4 py-2 bg-white text-purple-700 rounded-full font-semibold hover:bg-gray-100 transition-colors"
             >
               Return Home
             </button>
@@ -473,14 +473,14 @@ export default function Result() {
         <div className="mt-12 text-center">
           <button
             onClick={() => router.push("/")}
-            className="px-6 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            className="px-6 py-2.5 bg-white text-purple-700 rounded-full font-semibold hover:bg-gray-100 transition-colors"
           >
             Create Something New
           </button>
         </div>
       </main>
 
-      <footer className="py-6 text-center text-gray-500 text-sm">
+      <footer className="py-6 text-center text-white/60 text-sm">
         <p>© {new Date().getFullYear()} AI Document Creator</p>
       </footer>
     </div>

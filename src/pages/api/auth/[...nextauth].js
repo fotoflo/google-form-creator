@@ -14,8 +14,7 @@ export default NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       authorization: {
         params: {
-          scope:
-            "openid email profile https://www.googleapis.com/auth/forms https://www.googleapis.com/auth/presentations https://www.googleapis.com/auth/drive",
+          scope: "openid email profile",
           prompt: "consent",
           access_type: "offline",
           response_type: "code",

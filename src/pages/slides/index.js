@@ -29,9 +29,9 @@ export default function SlidesOverview() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-800 to-purple-600 text-white font-sans overflow-x-hidden">
       <Head>
-        <title>Google Slides Creator | AI Document Creator</title>
+        <title>Google Slides Creator | Prompt2Doc</title>
         <meta
           name="description"
           content="Create professional Google Slides presentations with AI"
@@ -40,12 +40,12 @@ export default function SlidesOverview() {
 
       <TopNav />
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className="max-w-6xl mx-auto px-4 py-8 mt-20">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Create Professional Presentations
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-white/80 max-w-2xl mx-auto">
             Turn your ideas into polished Google Slides presentations with AI
             assistance. Choose a template or start from scratch.
           </p>
@@ -55,17 +55,17 @@ export default function SlidesOverview() {
           {examples.map((example, index) => (
             <div
               key={index}
-              className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow p-6"
+              className="bg-[rgba(255,255,255,0.1)] backdrop-blur-sm border border-white/10 rounded-lg shadow-sm hover:shadow-md transition-shadow p-6"
             >
               <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-blue-900 rounded-full flex items-center justify-center text-blue-300 mr-4">
+                <div className="w-12 h-12 bg-indigo-800 rounded-full flex items-center justify-center text-white mr-4">
                   <FiLayout className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900">
+                <h3 className="text-xl font-semibold text-white">
                   {example.title}
                 </h3>
               </div>
-              <p className="text-gray-600 mb-4">{example.description}</p>
+              <p className="text-white/80 mb-4">{example.description}</p>
               <button
                 onClick={() =>
                   router.push(
@@ -74,7 +74,7 @@ export default function SlidesOverview() {
                     )}`
                   )
                 }
-                className="text-blue-600 hover:text-blue-700 flex items-center"
+                className="text-pink-200 hover:text-pink-100 flex items-center"
               >
                 Use Template <FiArrowRight className="ml-2" />
               </button>
@@ -85,7 +85,7 @@ export default function SlidesOverview() {
         <div className="text-center">
           <button
             onClick={() => router.push("/slides/create")}
-            className="px-8 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-lg"
+            className="px-8 py-3 bg-white text-indigo-900 rounded-full font-bold hover:bg-gray-100 transition-colors text-lg"
           >
             Create New Presentation
           </button>
