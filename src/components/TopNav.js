@@ -2,163 +2,231 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSession, signOut, signIn } from "next-auth/react";
+import Image from "next/image";
 
 export default function TopNav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
   const navItems = [
-    { href: "/documents", label: "Docs", icon: "📝" },
-    { href: "/sheets", label: "Sheets", icon: "📊" },
-    { href: "/slides", label: "Slides", icon: "🖼️" },
-    { href: "/forms", label: "Forms", icon: "📋" },
-    { href: "/prompts", label: "Prompts", icon: "💡" },
+    { href: "/#features", label: "Features" },
+    { href: "/#use-case", label: "Use Cases" },
   ];
 
-  const isActive = (path) => {
-    if (path === "/" && router.pathname === "/") return true;
-    if (path !== "/" && router.pathname.startsWith(path)) return true;
-    return false;
-  };
+  // Use landing nav style if not authenticated and on home page
+  const isLanding = !session && router.pathname === "/";
 
   return (
-    <nav className="bg-white shadow-md relative z-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex-shrink-0 flex items-center">
-            <Link href="/" className="text-xl font-bold text-gray-900">
-              <span className="mr-2">📄</span>
-              Prompt2Doc
-            </Link>
-          </div>
+    <nav
+      className={
+        isLanding
+          ? "bg-transparent absolute top-0 left-0 w-full z-20"
+          : "bg-white shadow-md relative z-20"
+      }
+    >
+      <div className="max-w-7xl mx-auto px-8 flex justify-between items-center h-20">
+        {/* Logo */}
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/prompt2doc-logo.png"
+            alt="Prompt2Doc logo"
+            width={200}
+            height={48}
+            priority
+            className={isLanding ? "h-18 w-auto" : "h-16 w-auto"}
+            style={{ minWidth: 40 }}
+          />
+        </Link>
 
-          <div className="hidden sm:flex sm:items-center sm:space-x-6">
-            <div className="flex space-x-6">
+        {/* Desktop nav */}
+        <div className="hidden sm:flex items-center space-x-8">
+          {isLanding ? (
+            <>
               {navItems.map((item) => (
-                <Link
+                <a
                   key={item.href}
                   href={item.href}
-                  className={`inline-flex items-center text-gray-600 hover:text-gray-900 ${
-                    isActive(item.href) ? "text-gray-900" : ""
-                  }`}
+                  className="text-white text-lg font-medium hover:underline transition"
                 >
-                  <span className="mr-2">{item.icon}</span>
                   {item.label}
-                </Link>
+                </a>
               ))}
-            </div>
-            {session ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-700">
-                  {session.user?.name || session.user?.email}
-                </span>
-                <button
-                  onClick={() => signOut()}
-                  className="text-sm text-gray-700 hover:text-gray-900"
-                >
-                  Sign out
-                </button>
-              </div>
-            ) : (
               <button
                 onClick={() => signIn("google")}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-white text-purple-700 rounded-full font-semibold hover:bg-gray-100 transition-colors ml-2"
               >
-                Sign in to Get Started
+                Get Started
               </button>
-            )}
-          </div>
+            </>
+          ) : (
+            <>
+              {/* App nav for authenticated users */}
+              <Link
+                href="/documents"
+                className="inline-flex items-center text-gray-600 hover:text-gray-900"
+              >
+                <span className="mr-2">📝</span>Docs
+              </Link>
+              <Link
+                href="/sheets"
+                className="inline-flex items-center text-gray-600 hover:text-gray-900"
+              >
+                <span className="mr-2">📊</span>Sheets
+              </Link>
+              <Link
+                href="/slides"
+                className="inline-flex items-center text-gray-600 hover:text-gray-900"
+              >
+                <span className="mr-2">🖼️</span>Slides
+              </Link>
+              <Link
+                href="/forms"
+                className="inline-flex items-center text-gray-600 hover:text-gray-900"
+              >
+                <span className="mr-2">📋</span>Forms
+              </Link>
+              <Link
+                href="/prompts"
+                className="inline-flex items-center text-gray-600 hover:text-gray-900"
+              >
+                <span className="mr-2">💡</span>Prompts
+              </Link>
+              {session ? (
+                <div className="flex items-center space-x-4 ml-4">
+                  <span className="text-sm text-gray-700">
+                    {session.user?.name || session.user?.email}
+                  </span>
+                  <button
+                    onClick={() => signOut()}
+                    className="text-sm text-gray-700 hover:text-gray-900"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => signIn("google")}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors ml-2"
+                >
+                  Sign in to Get Started
+                </button>
+              )}
+            </>
+          )}
+        </div>
 
-          <div className="-mr-2 flex items-center sm:hidden">
-            <button
-              onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
-              aria-expanded="false"
+        {/* Mobile nav toggle */}
+        <div className="-mr-2 flex items-center sm:hidden">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className={
+              isLanding
+                ? "inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-white hover:text-purple-700 focus:outline-none"
+                : "inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
+            }
+            aria-expanded={isMenuOpen}
+          >
+            <span className="sr-only">Open main menu</span>
+            {/* Hamburger icon */}
+            <svg
+              className="h-6 w-6"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
             >
-              <span className="sr-only">Open main menu</span>
-              {/* Icon when menu is closed */}
-              <svg
-                className={`${isMenuOpen ? "hidden" : "block"} h-6 w-6`}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-              {/* Icon when menu is open */}
-              <svg
-                className={`${isMenuOpen ? "block" : "hidden"} h-6 w-6`}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
         </div>
       </div>
 
-      {/* Mobile menu, show/hide based on menu state */}
-      <div className={`${isMenuOpen ? "block" : "hidden"} sm:hidden`}>
-        <div className="pt-2 pb-3 space-y-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                isActive(item.href)
-                  ? "bg-blue-50 border-blue-500 text-blue-700"
-                  : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
-              }`}
-            >
-              <span className="mr-2">{item.icon}</span>
-              {item.label}
-            </Link>
-          ))}
-        </div>
-        <div className="pt-4 pb-3 border-t border-gray-200">
-          <div className="flex items-center px-4">
-            {session ? (
-              <div className="flex flex-col">
-                <span className="text-base font-medium text-gray-800">
-                  {session.user?.name || session.user?.email}
-                </span>
-                <button
-                  onClick={() => signOut()}
-                  className="mt-1 text-sm text-gray-600 hover:text-gray-900"
+      {/* Mobile menu */}
+      <div
+        className={`${
+          isMenuOpen ? "block" : "hidden"
+        } sm:hidden bg-black bg-opacity-80`}
+      >
+        <div className="pt-2 pb-3 space-y-1 px-4">
+          {isLanding ? (
+            <>
+              {navItems.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="block text-white text-lg font-medium py-2 hover:underline"
                 >
-                  Sign out
-                </button>
-              </div>
-            ) : (
+                  {item.label}
+                </a>
+              ))}
               <button
                 onClick={() => signIn("google")}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                className="w-full px-4 py-2 bg-white text-purple-700 rounded-full font-semibold hover:bg-gray-100 transition-colors mt-2"
               >
-                Sign in to Get Started
+                Get Started
               </button>
-            )}
-          </div>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/documents"
+                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
+              >
+                <span className="mr-2">📝</span>Docs
+              </Link>
+              <Link
+                href="/sheets"
+                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
+              >
+                <span className="mr-2">📊</span>Sheets
+              </Link>
+              <Link
+                href="/slides"
+                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
+              >
+                <span className="mr-2">🖼️</span>Slides
+              </Link>
+              <Link
+                href="/forms"
+                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
+              >
+                <span className="mr-2">📋</span>Forms
+              </Link>
+              <Link
+                href="/prompts"
+                className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
+              >
+                <span className="mr-2">💡</span>Prompts
+              </Link>
+              {session ? (
+                <div className="flex flex-col mt-2">
+                  <span className="text-base font-medium text-gray-800">
+                    {session.user?.name || session.user?.email}
+                  </span>
+                  <button
+                    onClick={() => signOut()}
+                    className="mt-1 text-sm text-gray-600 hover:text-gray-900"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => signIn("google")}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors mt-2"
+                >
+                  Sign in to Get Started
+                </button>
+              )}
+            </>
+          )}
         </div>
       </div>
     </nav>
