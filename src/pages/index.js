@@ -15,23 +15,6 @@ export default function Home() {
     }
   }, [session, router]);
 
-  // If loading session, show loading state
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-white">
-        <Head>
-          <title>Loading... | Prompt2Doc</title>
-        </Head>
-        <TopNav />
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          <div className="flex justify-center items-center h-[60vh]">
-            <div className="w-16 h-16 border-4 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Landing page for unauthenticated users
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-700 to-pink-600 text-white font-sans overflow-x-hidden relative">
