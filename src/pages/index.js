@@ -6,7 +6,7 @@ import TopNav from "../components/TopNav";
 import Image from "next/image";
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const router = useRouter();
 
   useEffect(() => {
