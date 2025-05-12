@@ -41,78 +41,55 @@ export default function TopNav() {
 
         {/* Desktop nav */}
         <div className="hidden sm:flex items-center space-x-8">
-          {isLanding ? (
-            <>
-              {navItems.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className="text-white text-lg font-medium hover:underline transition"
-                >
-                  {item.label}
-                </a>
-              ))}
+          <Link
+            href="/documents"
+            className="inline-flex items-center text-white hover:text-pink-200 font-semibold"
+          >
+            <span className="mr-2">📝</span>Docs
+          </Link>
+          <Link
+            href="/sheets"
+            className="inline-flex items-center text-white hover:text-pink-200 font-semibold"
+          >
+            <span className="mr-2">📊</span>Sheets
+          </Link>
+          <Link
+            href="/slides"
+            className="inline-flex items-center text-white hover:text-pink-200 font-semibold"
+          >
+            <span className="mr-2">🖼️</span>Slides
+          </Link>
+          <Link
+            href="/forms"
+            className="inline-flex items-center text-white hover:text-pink-200 font-semibold"
+          >
+            <span className="mr-2">📋</span>Forms
+          </Link>
+          <Link
+            href="/prompts"
+            className="inline-flex items-center text-white hover:text-pink-200 font-semibold"
+          >
+            <span className="mr-2">💡</span>Prompts
+          </Link>
+          {session ? (
+            <div className="flex items-center space-x-4 ml-4">
+              <span className="text-sm text-white font-semibold">
+                {session.user?.name || session.user?.email}
+              </span>
               <button
-                onClick={() => signIn("google")}
-                className="px-4 py-2 bg-white text-purple-700 rounded-full font-semibold hover:bg-gray-100 transition-colors ml-2"
+                onClick={() => signOut()}
+                className="text-sm text-white hover:text-pink-200 font-semibold"
               >
-                Get Started
+                Sign out
               </button>
-            </>
+            </div>
           ) : (
-            <>
-              {/* App nav for authenticated users */}
-              <Link
-                href="/documents"
-                className="inline-flex items-center text-gray-600 hover:text-gray-900"
-              >
-                <span className="mr-2">📝</span>Docs
-              </Link>
-              <Link
-                href="/sheets"
-                className="inline-flex items-center text-gray-600 hover:text-gray-900"
-              >
-                <span className="mr-2">📊</span>Sheets
-              </Link>
-              <Link
-                href="/slides"
-                className="inline-flex items-center text-gray-600 hover:text-gray-900"
-              >
-                <span className="mr-2">🖼️</span>Slides
-              </Link>
-              <Link
-                href="/forms"
-                className="inline-flex items-center text-gray-600 hover:text-gray-900"
-              >
-                <span className="mr-2">📋</span>Forms
-              </Link>
-              <Link
-                href="/prompts"
-                className="inline-flex items-center text-gray-600 hover:text-gray-900"
-              >
-                <span className="mr-2">💡</span>Prompts
-              </Link>
-              {session ? (
-                <div className="flex items-center space-x-4 ml-4">
-                  <span className="text-sm text-gray-700">
-                    {session.user?.name || session.user?.email}
-                  </span>
-                  <button
-                    onClick={() => signOut()}
-                    className="text-sm text-gray-700 hover:text-gray-900"
-                  >
-                    Sign out
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => signIn("google")}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors ml-2"
-                >
-                  Sign in to Get Started
-                </button>
-              )}
-            </>
+            <button
+              onClick={() => signIn("google")}
+              className="px-4 py-2 bg-white text-purple-700 rounded-full font-semibold hover:bg-gray-100 transition-colors ml-2"
+            >
+              Get Started
+            </button>
           )}
         </div>
 
