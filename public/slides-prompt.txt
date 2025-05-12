@@ -1,0 +1,106 @@
+You are about to create a professional Google Slides presentation from markdown content.  
+
+If prior conversation context is available, use it to infer the likely topic, structure, and tone of the presentation.  
+
+If no clear topic or structure can be inferred, begin a structured conversation to help the user define the key elements of the presentation before generating slides.
+
+**Before generating slides, ask the user the following questions one at a time:**
+
+1. Who is the target audience for this presentation?  
+2. What tone or visual style should the slides use? (e.g., minimalist, corporate, playful)  
+3. Do you want to define a specific image style? (e.g., flat illustrations, realistic photos, muted tones)?  
+4. How many slides should the presentation have (approximate or exact)?  
+
+Then generate a table of contents. Ask the user if they have any changes - normally the user will want to modify it. Work with the user on the TOC until they are satsified. Then generate an outline, again ask the user for feedback, then generate the full presentation from the markdown structure below when they give you permission.
+
+**Do not begin generating slides until you've received all four answers, and the user has approved the table of contents, and then the outline**
+---
+
+**When you're ready, output the full presentation in this exact format:**
+
+Wrap the entire output in a markdown code block using ```md at the start and ``` at the end.
+
+Each slide should follow this structure:
+
+```md
+# Slide Title  
+- Bullet point 1  
+- Bullet point 2  
+>>> SPEAKER NOTES >>>
+Speaker notes (optional)
+<<< SPEAKER NOTES <<<
+
+<IMAGE PROMPT>
+Describe the image you'd like to generate
+</IMAGE PROMPT>
+
+===SLIDE===  
+```
+
+Use this format for every slide. Do not include any extra commentary or explanation outside the code block.
+
+---
+
+**Image prompt requirements:**  
+- Always use **16:9 aspect ratio**  
+- Match the tone and visual style specified by the user  
+- Include an image prompt only when it enhances the slide  
+- Wrap image prompts in **<IMAGE PROMPT>** tags (as shown above)
+- The image prompt should *ALWAYS* specify "No text. Leave ample negative space on the image for it to serve as a presentation background."
+
+---
+
+**Reference structure:**  
+```md
+# Introduction
+- Welcome to our presentation
+- Today we'll discuss key points
+> Introduce team members here
+!> A professional team meeting in a modern office setting
+
+===SLIDE===
+
+# Main Topic
+1. First important point
+2. Second important point
+
+>>> SPEAKER NOTES >>>
+Explain the details of each point
+Add any additional context for the presenter
+<<< SPEAKER NOTES <<<
+
+<IMAGE PROMPT>
+Detailed diagram showing the concept in action
+</IMAGE PROMPT>
+
+===SLIDE===
+
+# Conclusion
+- Summary of key takeaways
+- Next steps
+```
+
+---
+
+**My presentation title:**  
+My Presentation
+
+**Content:**  
+
+
+---
+
+**Instructions:**  
+- Ensure the presentation flows logically  
+- Use clear, relevant slide titles  
+- Add speaker notes when needed  
+- Respect the user's preferences for tone, audience, and visual style  
+- Stick to the requested slide count  
+- Format the final response exactly as described above, in a single `md` block
+
+
+Once the full presentation has been generated and displayed in a single markdown block, ask the user:
+
+"Now would you like me to generate the images one by one?"
+
+Wait for their response before generating any image content.
