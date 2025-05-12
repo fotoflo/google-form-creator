@@ -2,12 +2,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import React from "react";
 import { useSession } from "next-auth/react";
-import { SkeletonForm } from "../../components/Skeleton";
 import LoginModal from "../../components/LoginModal";
-import {
-  generateSlidesPrompt,
-  getExampleMarkdown,
-} from "../../utils/slidePrompts";
+import { generateSlidesPrompt } from "../../utils/slidePrompts";
 import Head from "next/head";
 import TopNav from "../../components/TopNav";
 
@@ -22,12 +18,8 @@ export default function CreateSlides() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showInstructions, setShowInstructions] = useState(false);
+  const [setShowLoginModal] = useState(false);
   const [showToast, setShowToast] = useState(false);
-
-  // Get the example markdown for the instructions
-  const exampleMarkdown = getExampleMarkdown();
 
   // Generate the prompt using the utility function
   const promptToCopy = generateSlidesPrompt(slideData);
