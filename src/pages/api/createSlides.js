@@ -1,9 +1,9 @@
 import { getToken } from "next-auth/jwt";
 import { google } from "googleapis";
 import { v4 as uuidv4 } from "uuid";
+import { slidesResults } from "../../utils/tempResultsStore"; // Import from shared store
 
-// In-memory storage (replace with a database in production)
-const slidesResults = {};
+// const slidesResults = {}; // REMOVE local instance
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -11,43 +11,24 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Get user token to access the OAuth token
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
     if (!token || !token.accessToken) {
-      return res
-        .status(401)
-        .json({ error: "Authentication failed. Please sign in again." });
+      return res.status(401).json({ error: "Authentication failed." });
     }
 
     const { title, markdownContent } = req.body;
-
-    if (!title) {
-      return res.status(400).json({ error: "Presentation title is required." });
+    if (!title || !markdownContent) {
+      return res
+        .status(400)
+        .json({ error: "Missing title or markdownContent." });
     }
 
-    if (!markdownContent) {
-      return res.status(400).json({
-        error:
-          "Presentation content is missing. Please provide markdown content.",
-      });
-    }
-
-    // Create OAuth2 client
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET
     );
-
-    oauth2Client.setCredentials({
-      access_token: token.accessToken,
-    });
-
-    // Initialize the Slides API
-    const slides = google.slides({
-      version: "v1",
-      auth: oauth2Client,
-    });
+    oauth2Client.setCredentials({ access_token: token.accessToken });
+    const slides = google.slides({ version: "v1", auth: oauth2Client });
 
     // Parse markdown content into slides
     const slideContents = parseMarkdownToSlides(markdownContent);
@@ -463,19 +444,17 @@ export default async function handler(req, res) {
       // Store the result
       slidesResults[resultId] = {
         id: resultId,
-        title: title,
         presentationId: presentationId,
-        presentationUrl: `https://docs.google.com/presentation/d/${presentationId}/edit`,
+        title: title,
         timestamp: new Date().toISOString(),
         type: "google-slides",
       };
+      console.log(
+        `Stored result with ID: ${resultId} in shared store. Presentation ID: ${presentationId}`
+      );
 
       // Return the ID and URL to the client
-      return res.status(200).json({
-        id: resultId,
-        presentationUrl: `https://docs.google.com/presentation/d/${presentationId}/edit`,
-        message: "Presentation created successfully!",
-      });
+      return res.status(200).json({ resultId: resultId });
     } catch (apiError) {
       console.error("Google Slides API error:", apiError);
       console.error("Error details:", JSON.stringify(apiError, null, 2));
@@ -502,11 +481,17 @@ export default async function handler(req, res) {
       });
     }
   } catch (error) {
-    console.error("Error creating presentation:", error);
-    return res.status(500).json({
-      error: "An unexpected error occurred while creating your presentation.",
-      details: error.message || "Unknown error",
-    });
+    console.error("Error in createSlides handler:", error);
+    // Distinguish between Google API errors and other errors if possible
+    if (error.response?.data?.error) {
+      // Axios-like error from Google
+      return res
+        .status(error.response.status || 500)
+        .json({ error: error.response.data.error.message });
+    }
+    return res
+      .status(500)
+      .json({ error: error.message || "Failed to create presentation." });
   }
 }
 

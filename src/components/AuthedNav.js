@@ -11,13 +11,29 @@ export default function AuthedNav() {
   const { data: session } = useSession();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
+  // Function to check if the current path matches a given route
+  const isActive = (path) => {
+    // Check if the current path starts with the given path
+    // This handles both exact matches and nested routes
+    return router.pathname.startsWith(path);
+  };
+
   const handleSignOut = async () => {
     await signOut({ redirect: false });
     router.push("/");
   };
 
+  // Navigation links configuration for reuse
+  const navLinks = [
+    { href: "/dashboard/documents", icon: "📝", label: "Docs" },
+    { href: "/dashboard/sheets", icon: "📊", label: "Sheets" },
+    { href: "/dashboard/slides", icon: "🖼️", label: "Slides" },
+    { href: "/dashboard/forms", icon: "📋", label: "Forms" },
+    { href: "/dashboard/prompts", icon: "💡", label: "Prompts" },
+  ];
+
   return (
-    <nav className="bg-transparent absolute top-0 left-0 w-full z-20">
+    <nav className="bg-transparent absolute top-0 left-0 w-full z-20 border-0">
       <div className="max-w-7xl mx-auto px-8 flex justify-between items-center h-20">
         {/* Logo */}
         <Link href="/dashboard" className="flex items-center">
@@ -34,36 +50,20 @@ export default function AuthedNav() {
 
         {/* Desktop nav */}
         <div className="hidden sm:flex items-center space-x-8">
-          <Link
-            href="/dashboard/documents"
-            className="inline-flex items-center text-white hover:text-pink-200 font-semibold"
-          >
-            <span className="mr-2">📝</span>Docs
-          </Link>
-          <Link
-            href="/dashboard/sheets"
-            className="inline-flex items-center text-white hover:text-pink-200 font-semibold"
-          >
-            <span className="mr-2">📊</span>Sheets
-          </Link>
-          <Link
-            href="/dashboard/slides"
-            className="inline-flex items-center text-white hover:text-pink-200 font-semibold"
-          >
-            <span className="mr-2">🖼️</span>Slides
-          </Link>
-          <Link
-            href="/dashboard/forms"
-            className="inline-flex items-center text-white hover:text-pink-200 font-semibold"
-          >
-            <span className="mr-2">📋</span>Forms
-          </Link>
-          <Link
-            href="/dashboard/prompts"
-            className="inline-flex items-center text-white hover:text-pink-200 font-semibold"
-          >
-            <span className="mr-2">💡</span>Prompts
-          </Link>
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`inline-flex items-center font-semibold transition-colors ${
+                isActive(link.href)
+                  ? "text-white font-bold"
+                  : "text-white hover:text-pink-200"
+              }`}
+            >
+              <span className="mr-2">{link.icon}</span>
+              {link.label}
+            </Link>
+          ))}
 
           {/* Profile dropdown */}
           <div className="relative ml-4">
@@ -99,14 +99,22 @@ export default function AuthedNav() {
               <div className="absolute right-0 mt-2 w-48 py-2 bg-[rgba(0,0,0,0.7)] backdrop-blur-md rounded-md shadow-xl z-50 border border-[rgba(255,255,255,0.1)]">
                 <Link
                   href="/dashboard/profile"
-                  className="flex items-center px-4 py-2 text-sm text-white hover:bg-[rgba(255,255,255,0.1)] hover:text-pink-200"
+                  className={`flex items-center px-4 py-2 text-sm ${
+                    isActive("/dashboard/profile")
+                      ? "bg-[rgba(255,255,255,0.1)] text-pink-300"
+                      : "text-white hover:bg-[rgba(255,255,255,0.1)] hover:text-pink-200"
+                  }`}
                 >
                   <FiUser className="mr-2" />
                   Profile
                 </Link>
                 <Link
                   href="/dashboard/settings"
-                  className="flex items-center px-4 py-2 text-sm text-white hover:bg-[rgba(255,255,255,0.1)] hover:text-pink-200"
+                  className={`flex items-center px-4 py-2 text-sm ${
+                    isActive("/dashboard/settings")
+                      ? "bg-[rgba(255,255,255,0.1)] text-pink-300"
+                      : "text-white hover:bg-[rgba(255,255,255,0.1)] hover:text-pink-200"
+                  }`}
                 >
                   <FiSettings className="mr-2" />
                   Settings
@@ -158,36 +166,20 @@ export default function AuthedNav() {
         } sm:hidden bg-[rgba(0,0,0,0.8)] backdrop-blur-md`}
       >
         <div className="pt-2 pb-3 space-y-1 px-4">
-          <Link
-            href="/dashboard/documents"
-            className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-white hover:bg-[rgba(255,255,255,0.1)] hover:border-pink-300"
-          >
-            <span className="mr-2">📝</span>Docs
-          </Link>
-          <Link
-            href="/dashboard/sheets"
-            className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-white hover:bg-[rgba(255,255,255,0.1)] hover:border-pink-300"
-          >
-            <span className="mr-2">📊</span>Sheets
-          </Link>
-          <Link
-            href="/dashboard/slides"
-            className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-white hover:bg-[rgba(255,255,255,0.1)] hover:border-pink-300"
-          >
-            <span className="mr-2">🖼️</span>Slides
-          </Link>
-          <Link
-            href="/dashboard/forms"
-            className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-white hover:bg-[rgba(255,255,255,0.1)] hover:border-pink-300"
-          >
-            <span className="mr-2">📋</span>Forms
-          </Link>
-          <Link
-            href="/dashboard/prompts"
-            className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-white hover:bg-[rgba(255,255,255,0.1)] hover:border-pink-300"
-          >
-            <span className="mr-2">💡</span>Prompts
-          </Link>
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                isActive(link.href)
+                  ? "border-pink-300 bg-[rgba(255,255,255,0.05)] text-pink-300"
+                  : "border-transparent text-white hover:bg-[rgba(255,255,255,0.1)] hover:border-pink-300"
+              }`}
+            >
+              <span className="mr-2">{link.icon}</span>
+              {link.label}
+            </Link>
+          ))}
           <div className="flex flex-col mt-4 pt-4 border-t border-[rgba(255,255,255,0.1)]">
             <span className="text-base font-medium text-white">
               {session?.user?.name || session?.user?.email}

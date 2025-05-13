@@ -72,15 +72,15 @@ export default function Dashboard() {
   };
 
   // Show loading state while checking session
-  if (status === "loading") {
-    return (
-      <DashboardLayout>
-        <div className="flex justify-center items-center h-[60vh]">
-          <div className="w-16 h-16 border-4 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  // if (status === "loading") {
+  //   return (
+  //     <DashboardLayout>
+  //       <div className="flex justify-center items-center h-[60vh]">
+  //         <div className="w-16 h-16 border-4 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
+  //       </div>
+  //     </DashboardLayout>
+  //   );
+  // }
 
   return (
     <DashboardLayout

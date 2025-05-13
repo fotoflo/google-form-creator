@@ -14,7 +14,7 @@ export default function DashboardLayout({ children, title, description }) {
 
       <AuthedNav />
 
-      <main className="max-w-7xl mx-auto px-8 py-8 mt-20">{children}</main>
+      <main className="max-w-7xl mx-auto px-8 py-8 mt-[80px]">{children}</main>
     </div>
   );
 }
