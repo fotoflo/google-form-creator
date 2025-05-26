@@ -1,7 +1,7 @@
 import { getToken } from "next-auth/jwt";
 import { google } from "googleapis";
-import { v4 as uuidv4 } from "uuid";
-import { slidesResults } from "../../utils/tempResultsStore"; // Import from shared store
+// import { v4 as uuidv4 } from "uuid"; // Removed unused import
+// import { slidesResults } from "../../utils/tempResultsStore"; // REMOVE this line
 
 // const slidesResults = {}; // REMOVE local instance
 
@@ -438,23 +438,41 @@ export default async function handler(req, res) {
         console.log("Speaker notes added successfully");
       }
 
-      // Generate a unique ID for this result
-      const resultId = uuidv4();
+      // All updates (content, speaker notes, images) are done.
+      // Now delete the default first slide
+      console.log("Deleting default slide:", defaultSlideId);
+      await slides.presentations.batchUpdate({
+        presentationId: presentationId,
+        requestBody: {
+          requests: [
+            {
+              deleteObject: {
+                objectId: defaultSlideId,
+              },
+            },
+          ],
+        },
+      });
+      console.log("Default slide deleted.");
 
-      // Store the result
-      slidesResults[resultId] = {
-        id: resultId,
+      // Construct redirect URL
+      const timestamp = new Date().toISOString();
+      const redirectUrl = `/result?type=google-slides&presentationId=${presentationId}&title=${encodeURIComponent(
+        title
+      )}&timestamp=${timestamp}`;
+
+      console.log(
+        "Successfully created presentation. Redirect URL:",
+        redirectUrl
+      );
+      // Send success response with redirectUrl
+      return res.status(200).json({
+        message: "Presentation created successfully!",
         presentationId: presentationId,
         title: title,
-        timestamp: new Date().toISOString(),
-        type: "google-slides",
-      };
-      console.log(
-        `Stored result with ID: ${resultId} in shared store. Presentation ID: ${presentationId}`
-      );
-
-      // Return the ID and URL to the client
-      return res.status(200).json({ resultId: resultId });
+        redirectUrl: redirectUrl,
+        timestamp: timestamp,
+      });
     } catch (apiError) {
       console.error("Google Slides API error:", apiError);
       console.error("Error details:", JSON.stringify(apiError, null, 2));

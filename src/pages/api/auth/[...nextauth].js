@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import GoogleSlidesProvider from "../../../lib/GoogleSlidesProvider";
+import GoogleSlidesProvider from "../../../lib/GoogleSlidesProvider.js";
 
 // Add this line to help with debugging
 console.log(

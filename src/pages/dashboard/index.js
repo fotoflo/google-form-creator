@@ -72,15 +72,25 @@ export default function Dashboard() {
   };
 
   // Show loading state while checking session
-  // if (status === "loading") {
-  //   return (
-  //     <DashboardLayout>
-  //       <div className="flex justify-center items-center h-[60vh]">
-  //         <div className="w-16 h-16 border-4 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
-  //       </div>
-  //     </DashboardLayout>
-  //   );
-  // }
+  if (status === "loading") {
+    return (
+      <DashboardLayout>
+        <div className="flex justify-center items-center h-[60vh]">
+          <div className="w-16 h-16 border-4 border-blue-400 border-t-blue-600 rounded-full animate-spin"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // If there's no session and it's not loading (and not unauthenticated due to redirect),
+  // it's an unexpected state, but we should avoid crashing.
+  // The useEffect for unauthenticated status should handle redirection.
+  if (!session) {
+    // Optionally, render a placeholder or null, or a more specific error.
+    // For now, returning null to prevent rendering parts that depend on session.user.
+    // The redirect for "unauthenticated" should ideally prevent this state from being visible for long.
+    return null;
+  }
 
   return (
     <DashboardLayout

@@ -1,0 +1,89 @@
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+// ... other imports
+
+export default function Result() {
+  const router = useRouter();
+  // Destructure all expected params directly from query
+  const { presentationId, title, type, timestamp, id /* for old markdown/json type results */ } = router.query;
+
+  const [resultData, setResultData] = useState(null);
+  const [loading, setLoading] = useState(true); // May set to false sooner if data is direct
+  const [error, setError] = useState("");
+  // ... other states like copied, deleting
+
+  useEffect(() => {
+    if (type === "google-slides" && presentationId && title) {
+      // If primary data for Google Slides is in query string, use it directly
+      setResultData({
+        presentationId,
+        title,
+        type,
+        timestamp: timestamp || new Date().toISOString(), // Fallback for timestamp
+      });
+      setLoading(false);
+      setError("");
+    } else if (id) { // Fallback for types that still use /api/getResult (e.g., old JSON/markdown if any)
+      setLoading(true);
+      const fetchResult = async () => {
+        try {
+          const response = await fetch(`/api/getResult?id=${id}`); // This API might be simplified or removed
+          if (!response.ok) {
+            throw new Error("Failed to fetch result for ID: " + id);
+          }
+          const data = await response.json();
+          setResultData(data);
+        } catch (err) {
+          console.error("Error fetching result by ID:", err);
+          setError("Failed to load the result details.");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchResult();
+    } else if (type && !presentationId) {
+      // Handle cases where type is present but essential data is missing
+      setError(`Cannot display result: Missing data for type '${type}'.`);
+      setLoading(false);
+    } else if (!type && !id) {
+        // No identifiable information to load a result
+        setError("No result information provided in the URL.");
+        setLoading(false);
+    }
+  }, [presentationId, title, type, timestamp, id, router]); // Add router to deps if needed
+
+  const renderGoogleSlides = () => {
+    // Now uses resultData which is populated from router.query or fetched
+    if (!resultData || resultData.type !== "google-slides" || !resultData.presentationId) {
+      return null;
+    }
+    return (
+      // ... JSX for rendering Google Slides, using resultData.presentationId, resultData.title ...
+      // Example:
+      // <iframe src={`https://docs.google.com/presentation/d/${resultData.presentationId}/embed...`}></iframe>
+      // <h2>{resultData.title}</h2>
+      // <p>Created: {new Date(resultData.timestamp).toLocaleString()}</p>
+    );
+  };
+  
+  // renderGoogleForm, renderMarkdownSlides etc. would also use resultData
+
+  const renderContent = () => {
+    if (loading) return <p>Loading...</p>; // Or spinner
+    if (error) return <p>Error: {error}</p>;
+    if (!resultData) return <p>No result to display.</p>;
+
+    if (resultData.type === "google-slides") {
+      return renderGoogleSlides();
+    }
+    // ... handle other types if resultData.type indicates them ...
+    // For other types that still use /api/getResult, their data will be in resultData.
+    return <p>Unsupported result type: {resultData.type}</p>;
+  };
+
+  return (
+    // ... main layout ...
+    // {renderContent()}
+    // ...
+  );
+} 
