@@ -71,7 +71,7 @@ export default function TopNav() {
                 {session.user?.name || session.user?.email}
               </span>
               <button
-                onClick={() => signOut()}
+                onClick={() => signOut({ callbackUrl: "/" })}
                 className="text-sm text-white hover:text-pink-200 font-semibold"
               >
                 Sign out
@@ -178,7 +178,7 @@ export default function TopNav() {
                     {session.user?.name || session.user?.email}
                   </span>
                   <button
-                    onClick={() => signOut()}
+                    onClick={() => signOut({ callbackUrl: "/" })}
                     className="mt-1 text-sm text-white hover:text-pink-200"
                   >
                     Sign out
